@@ -1,0 +1,55 @@
+{{ define "main" }}
+<section class="gl-hero gl-container" aria-labelledby="hero-title">
+  <div class="gl-hero-copy">
+    <a class="gl-release" href="{{ "blog/alpha-7/" | relURL }}"><span class="gl-status-dot"></span> v0.3.0-alpha.7 <span class="gl-release-divider">/</span> 新增版本化字段定义</a>
+    <p class="gl-eyebrow">SPATIAL DATA. VERSIONED.</p>
+    <h1 id="hero-title">空间数据，<br><span>版本有据。</span></h1>
+    <p class="gl-hero-lead">让每一次更新，都有清晰的来路。<br>在独立工作区编辑空间要素，审阅差异、合并修改，再以一次事务发布为共享修订。</p>
+    <div class="gl-actions"><a class="gl-button gl-button-primary" href="{{ "docs/start/quickstart/" | relURL }}">开始使用</a><a class="gl-button gl-button-secondary" href="{{ "docs/architecture/overview/" | relURL }}">了解架构</a></div>
+    <p class="gl-hero-meta">Rust 构建 <span>·</span> MIT 开源 <span>·</span> 自托管</p>
+  </div>
+  <div class="gl-version-card" aria-label="工作区从共享修订分叉，保存草稿并发布到下一修订的示意图">
+    <div class="gl-card-bar"><span><i class="gl-tiny-mark" aria-hidden="true"></i> city-infrastructure</span><span class="gl-mono">PROJECT / HEAD</span></div>
+    <div class="gl-version-stage">
+      <div class="gl-lane-label">共享修订 <span>MAINLINE</span></div>
+      <svg class="gl-graph" viewBox="0 0 480 220" role="img" aria-labelledby="graph-title graph-desc">
+        <title id="graph-title">工作区与共享修订</title><desc id="graph-desc">工作区基于 r10 独立编辑；另一个工作区先发布 r11。三方合并后发布 r12。工作区不是 Git 分支。</desc>
+        <path d="M48 58H430" fill="none" stroke="#d0d5dd" stroke-width="3"/>
+        <path d="M145 58C170 58 175 160 210 160H302C350 160 350 58 410 58" fill="none" stroke="#fa520f" stroke-width="3"/>
+        <circle cx="48" cy="58" r="7" fill="#fff" stroke="#98a2b3" stroke-width="3"/><circle cx="145" cy="58" r="8" fill="#101828"/>
+        <circle cx="273" cy="58" r="8" fill="#101828"/><circle cx="410" cy="58" r="10" fill="#fa520f"/><circle cx="238" cy="160" r="7" fill="#fff" stroke="#fa520f" stroke-width="3"/>
+        <text x="48" y="29" text-anchor="middle">r9</text><text x="145" y="29" text-anchor="middle">r10</text><text x="273" y="29" text-anchor="middle">r11</text><text x="410" y="29" text-anchor="middle" class="gl-graph-accent">r12</text>
+        <text x="145" y="89" text-anchor="middle" class="gl-graph-small">Base</text><text x="273" y="89" text-anchor="middle" class="gl-graph-small">Current</text><text x="410" y="89" text-anchor="middle" class="gl-graph-small">Published</text>
+        <text x="246" y="199" text-anchor="middle" class="gl-graph-accent">Workspace · Draft</text>
+      </svg>
+      <div class="gl-change-row"><span class="gl-change-tag">+ 新增</span><span>道路中心线</span><code>road-021</code></div>
+      <div class="gl-change-row"><span class="gl-change-tag gl-tag-update">~ 修改</span><span>道路宽度</span><code>12 改为 15</code></div>
+    </div>
+    <div class="gl-card-foot"><span class="gl-status-dot"></span> 要素 · 历史 · HEAD · 回执 · 审计 <strong>一次事务</strong></div>
+  </div>
+</section>
+<div class="gl-stack-band"><div class="gl-container gl-stack-inner"><span class="gl-stack-label">沿用你的空间数据基础设施</span><strong>PostgreSQL <span>+ PostGIS</span></strong><strong>SQLite <span>+ SpatiaLite</span></strong><strong>HTTP <span>/ gRPC</span></strong><strong>4 <span>语言 SDK</span></strong></div></div>
+<section class="gl-section gl-container" aria-labelledby="console-title">
+  <div class="gl-section-heading"><div><p class="gl-eyebrow">THE CONSOLE</p><h2 id="console-title">数据、草稿与历史，<br>在同一张工作台上。</h2></div><p>地图用于理解空间变化，属性表用于检查细节。<br>工作区让编辑保持独立，发布让变更边界清晰。<a class="gl-text-link" href="{{ "docs/guides/console/" | relURL }}">浏览控制台指南</a></p></div>
+  <figure class="gl-console-frame"><div class="gl-window-bar"><span class="gl-window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>GeoLedger Console</span><span class="gl-live-label">真实测试界面</span></div><a href="{{ "images/screenshots/console-map.png" | relURL }}" aria-label="查看完整控制台地图截图"><img src="{{ "images/screenshots/console-map.png" | relURL }}" alt="GeoLedger PostGIS 控制台实测：道路图层、合成测试线与选中要素属性" width="1343" height="683" loading="lazy" decoding="async"></a><figcaption>真实 PostGIS 测试截图 · 2026-10-22 · 界面版本 alpha.6。字段发布等 alpha.7 界面见控制台指南。</figcaption></figure>
+</section>
+<section class="gl-workflow-section"><div class="gl-container gl-section">
+  <div class="gl-section-heading"><div><p class="gl-eyebrow">ONE COHERENT WORKFLOW</p><h2>从独立编辑，到共同认可的版本。</h2></div><a class="gl-text-link" href="{{ "docs/start/first-publication/" | relURL }}">完成第一次发布</a></div>
+  <ol class="gl-workflow"><li><span class="gl-step-number">01</span><h3>创建工作区</h3><p>基于共享修订开始编辑。一个工作区可以覆盖项目内多个数据集。</p><code>Workspace / Base</code></li><li><span class="gl-step-number">02</span><h3>保存与审阅</h3><p>要素和字段意图先进入草稿。Diff 展示本次修改，不改动正式数据。</p><code>Save / Diff</code></li><li><span class="gl-step-number">03</span><h3>合并与确认</h3><p>比较 Base、Current 与 Draft。自动合并独立属性，明确呈现冲突。</p><code>Resolve / Rebase</code></li><li><span class="gl-step-number">04</span><h3>原子发布</h3><p>正式数据与版本历史共同提交。通过回执确认结果，按修订追溯数据。</p><code>Publish / Revision</code></li></ol>
+</div></section>
+<section class="gl-section gl-container" aria-labelledby="features-title">
+  <div class="gl-section-heading"><div><p class="gl-eyebrow">DESIGNED FOR SPATIAL DATA</p><h2 id="features-title">版本管理，不必离开空间数据库。</h2></div><p>保留原始坐标与数值精度。<br>用明确的数据契约，连接编辑器与业务系统。</p></div>
+  <div class="gl-feature-grid">
+    <a class="gl-feature" href="{{ "docs/architecture/version-model/" | relURL }}"><span class="gl-feature-id">01 / DATA MODEL</span><h3>要素级变更，项目级修订</h3><p>以稳定 ID 跟踪要素，跨数据集组织一次更新。不把整份 GeoJSON 文件当作唯一提交单位。</p></a>
+    <a class="gl-feature" href="{{ "docs/guides/postgis/" | relURL }}"><span class="gl-feature-id">02 / POSTGIS</span><h3>纳管已有业务表</h3><p>绑定符合约束的原表，保留原始 CRS。正式发布写回原表，版本记录与业务变更共同提交。</p></a>
+    <a class="gl-feature" href="{{ "docs/architecture/merge/" | relURL }}"><span class="gl-feature-id">03 / MERGE</span><h3>让冲突可见、可处理</h3><p>按属性字段进行三方合并，几何作为整体比较。解决结果与当前 HEAD 和草稿版本绑定。</p></a>
+    <a class="gl-feature" href="{{ "docs/guides/schema/" | relURL }}"><span class="gl-feature-id">04 / SCHEMA</span><h3>字段定义，也有版本</h3><p>在工作区组织普通属性字段的新增和删除。按修订读取 Schema，与要素内容保持对应。</p></a>
+    <a class="gl-feature" href="{{ "docs/architecture/transactions/" | relURL }}"><span class="gl-feature-id">05 / CORRECTNESS</span><h3>提交有边界，重试有依据</h3><p>以数据库事务保证发布原子性。响应中断时，沿用原请求 ID 和请求内容确认发布结果。</p></a>
+    <a class="gl-feature" href="{{ "docs/guides/history/" | relURL }}"><span class="gl-feature-id">06 / HISTORY</span><h3>追溯过去，而非抹去过去</h3><p>按固定修订查询历史。撤销某次提交时生成反向工作区，经审阅发布为新的修订。</p></a>
+  </div>
+</section>
+<section class="gl-architecture-section"><div class="gl-container gl-section gl-architecture-grid"><div><p class="gl-eyebrow">ONE ENGINE. TWO BACKENDS.</p><h2>接入方式不同，<br>版本语义相同。</h2><p class="gl-section-lead">控制台、HTTP、CLI 与 SDK 汇入同一个 Rust Application。领域规则独立于传输，存储能力共享同一事务。</p><a class="gl-text-link" href="{{ "docs/architecture/overview/" | relURL }}">阅读完整架构与设计取舍</a></div><div class="gl-architecture-mini" aria-label="客户端经 HTTP 或 gRPC 进入 Application，Application 调用合并核心与事务存储适配器"><div class="gl-arch-row"><span>Web Console</span><span>CLI / 4 SDKs</span></div><div class="gl-arch-connector" aria-hidden="true"></div><div class="gl-arch-engine"><small>geoledger-engine</small><strong>Application</strong><span>授权 · 校验 · 合并编排 · 发布</span></div><div class="gl-arch-side">geoledger-core <span>纯合并规则</span></div><div class="gl-arch-connector" aria-hidden="true"></div><div class="gl-arch-port">StorageBackend / RepositoryTransaction</div><div class="gl-arch-connector" aria-hidden="true"></div><div class="gl-arch-row"><span>SQLite + SpatiaLite</span><span>PostgreSQL + PostGIS</span></div></div></div></section>
+<section class="gl-section gl-container"><div class="gl-section-heading"><div><p class="gl-eyebrow">START WHERE YOU ARE</p><h2>从你的角色出发。</h2></div><p>先完成一个具体任务，再深入协议和实现。</p></div><div class="gl-path-grid"><a href="{{ "docs/start/quickstart/" | relURL }}"><small>FOR GIS TEAMS</small><h3>先运行，再体验。</h3><p>启动服务，导入要素，完成第一次草稿审阅与发布。</p><span>快速开始</span></a><a href="{{ "docs/reference/sdk/" | relURL }}"><small>FOR DEVELOPERS</small><h3>接入现有应用。</h3><p>选择 SDK，理解身份、分页和发布重试的准确契约。</p><span>API 与 SDK</span></a><a href="{{ "docs/architecture/overview/" | relURL }}"><small>FOR ARCHITECTS</small><h3>理解一致性边界。</h3><p>查看版本模型、存储布局与事务边界，以及后端扩展方式。</p><span>架构设计</span></a></div></section>
+<section class="gl-section gl-container gl-updates"><div class="gl-section-heading"><div><p class="gl-eyebrow">PROJECT NOTES</p><h2>每一步演进，都有记录。</h2></div><a class="gl-text-link" href="{{ "blog/" | relURL }}">全部变更日志</a></div><div class="gl-update-list">{{ range first 3 (where .Site.RegularPages "Section" "blog").ByDate.Reverse }}<a href="{{ .RelPermalink }}"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time><h3>{{ .Title }}</h3></a>{{ end }}</div></section>
+<section class="gl-cta"><div class="gl-container gl-cta-inner"><div><p class="gl-eyebrow">MAKE YOUR NEXT CHANGE TRACEABLE.</p><h2>从下一次数据更新开始。</h2><p>创建一个项目，把编辑、审阅与发布连成一条可靠的工作流。</p></div><div class="gl-actions"><a class="gl-button gl-button-primary" href="{{ "docs/start/quickstart/" | relURL }}">阅读快速开始</a><a class="gl-button gl-button-dark" href="https://github.com/mapseekai/geoledger">查看源代码</a></div></div></section>
+{{ end }}

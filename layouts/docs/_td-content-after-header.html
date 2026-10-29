@@ -1,0 +1,14 @@
+{{- partial "book/draft-banner.html" . -}}
+{{- if .IsPage -}}
+  {{- $labels := dict "tutorial" "教程" "howto" "操作指南" "reference" "技术参考" "explanation" "概念解释" -}}
+  {{- with index $labels (.Params.doc_type | default "") -}}
+  <aside class="gl-doc-context" aria-label="文档类型与适用范围">
+    <strong>{{ . }}</strong>
+    <span>源码基线 <code>{{ substr hugo.Data.project.source_commit 0 7 }}</code></span>
+    <a href="{{ relref $ "/docs/reference/compatibility/" }}">版本与验证范围</a>
+    {{- if in (slice "tutorial" "howto") $.Params.doc_type }}
+    <span class="gl-doc-validation">操作草案：已核对源码，待隔离实例验证。</span>
+    {{- end }}
+  </aside>
+  {{- end -}}
+{{- end -}}

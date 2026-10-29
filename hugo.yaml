@@ -1,0 +1,68 @@
+title: GeoLedger
+baseURL: http://localhost:1313/
+defaultContentLanguage: zh
+locale: zh-CN
+hasCJKLanguage: true
+timeZone: Asia/Shanghai
+enableRobotsTXT: true
+enableGitInfo: false
+taxonomies:
+  tag: tags
+  category: categories
+menus:
+  main:
+    - {identifier: home, name: Home, pageRef: /, weight: 10, params: {icon: fa-solid fa-house}}
+    - {identifier: docs, name: Docs, pageRef: /docs, weight: 20, params: {icon: fa-solid fa-book-open}}
+    - {identifier: blog, name: Blog, pageRef: /blog, weight: 30, params: {icon: fa-solid fa-code-branch}}
+markup:
+  goldmark:
+    renderer: {unsafe: true}
+    parser:
+      wrapStandAloneImageWithinParagraph: false
+      attribute: {block: true}
+  highlight: {noClasses: false}
+  tableOfContents: {startLevel: 2, endLevel: 3, ordered: false}
+outputs:
+  home: [HTML, RSS, markdown, LLMS, NAVJSON]
+  page: [HTML, markdown]
+  section: [HTML, RSS, print, markdown]
+params:
+  description: GeoLedger 是基于 Rust 的空间要素版本管理服务。通过独立工作区、三方合并和原子发布，为 PostGIS 与 SQLite 空间数据建立可追溯的修订历史。
+  logo: icons/logo-nav.svg
+  github_repo: https://github.com/mapseekai/geoledger-web
+  github_branch: main
+  github_project_repo: https://github.com/mapseekai/geoledger
+  version: 0.3.0-alpha.7
+  offline_search: true
+  offline_search_on_serve: true
+  offline_search_max_results: 12
+  copyright: {authors: MapseekAI, from_year: 2026}
+  ui:
+    preset: slate
+    preset_menu: false
+    typography: system
+    theme_color: '#cc3a05'
+    theme_color_dark: '#ff9b72'
+    dark_mode: true
+    section_index: cards
+    section_index_columns: 2
+    blog_index: list
+    blog_index_size: 12
+    sidebar_menu_foldable: true
+    sidebar_icon_policy: groups
+    sidebar_expand_levels: 2
+    sidebar_root_enabled: true
+    docs_sidebar_root: section
+    backlinks: true
+    image_zoom: true
+    reading_time: true
+    lastmod_commit: none
+    annotation: false
+    code_copy: true
+    page_context_menu: {enable: true, assistant_links: false}
+    footer_style: slim
+    toc_taxonomies: false
+module:
+  imports:
+    - path: github.com/pgsty/oink
+  hugoVersion: {extended: true, min: 0.168.0}

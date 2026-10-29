@@ -1,0 +1,8 @@
+{{ $file := .Get "file" }}
+{{ $image := index hugo.Data.screenshots $file }}
+{{ if not $image }}{{ errorf "Unknown screenshot: %s" $file }}{{ end }}
+{{ $path := printf "images/screenshots/%s" $file }}
+<figure class="gl-screenshot">
+  <a href="{{ $path | relURL }}"><img src="{{ $path | relURL }}" alt="{{ .Get "alt" }}" width="{{ $image.width }}" height="{{ $image.height }}" loading="lazy" decoding="async"></a>
+  <figcaption>{{ .Get "caption" }}<br>真实测试截图 · {{ $image.captured_at }} · 界面版本 {{ $image.visible_version }}</figcaption>
+</figure>

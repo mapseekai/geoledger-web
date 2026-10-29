@@ -1,0 +1,50 @@
+{
+  "console-map.png": {
+    "file": "console-map.png",
+    "width": 1343,
+    "height": 683,
+    "captured_at": "2026-10-22",
+    "visible_version": "0.3.0-alpha.6",
+    "caption": "PostGIS 道路测试要素与属性，12 条合成线数据",
+    "provenance": "GeoLedger checkout / artifacts/dataset-tables-validation-20261022/postgis-browser-edited-line.png",
+    "sha256": "63f8a9eef9dae3dabcc3c503443b36d34e7199a3b11e07d12a7e97108ed89ada",
+    "alterations": "none",
+    "kind": "existing real test screenshot"
+  },
+  "console-workspaces.png": {
+    "file": "console-workspaces.png",
+    "width": 1440,
+    "height": 1000,
+    "captured_at": "2026-10-15",
+    "visible_version": "0.3.0-alpha.3",
+    "caption": "LUCC 测试项目的工作区版本图",
+    "provenance": "GeoLedger checkout / artifacts/full-validation-20261015/shots/visual-workspaces-1440.png",
+    "sha256": "460c4b2eac9d07b07ae1e5cd4e7df229e160ea0e53e2762634ce43c58a88e0a4",
+    "alterations": "none",
+    "kind": "existing real test screenshot"
+  },
+  "console-history.png": {
+    "file": "console-history.png",
+    "width": 1440,
+    "height": 1000,
+    "captured_at": "2026-10-15",
+    "visible_version": "0.3.0-alpha.3",
+    "caption": "LUCC 测试项目的提交历史",
+    "provenance": "GeoLedger checkout / artifacts/full-validation-20261015/shots/visual-history-1440.png",
+    "sha256": "b8cedb420e850434d4bbf45f26323b0dece372b17d4887ddabca06d73dddb21e",
+    "alterations": "none",
+    "kind": "existing real test screenshot"
+  },
+  "console-schema.png": {
+    "file": "console-schema.png",
+    "width": 1355,
+    "height": 695,
+    "captured_at": "2026-10-26",
+    "visible_version": "0.3.0-alpha.7",
+    "caption": "Alpha7 release validation 的纯字段变更发布结果",
+    "provenance": "local test artifacts / geoledger-alpha7-web-fixture/schema-published.png",
+    "sha256": "ac74da5f0c9d12d8ccae1205599c1d412525c43812ba3fc2a51d680cb0bdfcf6",
+    "alterations": "none",
+    "kind": "existing real test screenshot"
+  }
+}

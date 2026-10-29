@@ -1,0 +1,60 @@
+name: Build, validate, and deploy website
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: read
+concurrency:
+  group: website-check-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GOWORK: off
+      HUGO_MODULE_WORKSPACE: off
+      BASE_URL: https://mapseekai.github.io/geoledger-web/
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.27.3'
+          cache-dependency-path: go.sum
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.168.0'
+          extended: true
+      - name: Download pinned theme
+        run: go mod download
+      - name: Build and check
+        run: ./scripts/check.sh
+      - name: Verify subpath deployment
+        run: |
+          BASE_URL=https://example.invalid/geoledger/ ./scripts/build.sh --destination .cache/subpath-public
+          python3 scripts/check_site.py .cache/subpath-public --base-url https://example.invalid/geoledger/
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v6
+      - name: Upload website
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

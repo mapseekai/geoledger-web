@@ -1,0 +1,12 @@
+.cache/
+.tools/
+public/
+resources/
+.hugo_build.lock
+artifacts/
+.DS_Store
+__pycache__/
+*.py[cod]
+.hugo_cache/
+.env
+.env.local
