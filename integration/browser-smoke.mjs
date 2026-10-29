@@ -6,7 +6,7 @@ const config = globalThis.GEOLEDGER_WEB_TEST ?? {};
 const root = config.root;
 if (!root || !path.isAbsolute(root))
   throw new Error("Run this test through scripts/browser-check.sh");
-const base = config.base ?? "http://localhost:1313";
+const base = (config.base ?? "http://localhost:1313").replace(/\/$/, "");
 const existing = config.spaceId;
 const task = await taskSpace(
   existing ? Number(existing) : "GeoLedger Web smoke test",
@@ -55,7 +55,7 @@ try {
         await page.evaluate(() =>
           document.querySelector(".gl-footer-brand")?.scrollIntoView({ block: "center" }),
         );
-      const result = await page.evaluate(() => {
+      const result = await page.evaluate((route) => {
         const brand = document.querySelector(".gl-footer-brand");
         const rect = brand?.getBoundingClientRect();
         const hit = rect && document.elementFromPoint(
@@ -66,7 +66,7 @@ try {
           width: innerWidth,
           scrollWidth: document.documentElement.scrollWidth,
           h1: document.querySelector("h1")?.textContent,
-          footerBrandVisible: location.pathname.startsWith("/tags/")
+          footerBrandVisible: route.startsWith("/tags/")
             ? !!hit && brand.contains(hit) : undefined,
           errors: window.__glTestErrors ?? [],
           httpErrors: performance
@@ -74,10 +74,10 @@ try {
             .filter((r) => r.responseStatus >= 400)
             .map((r) => ({ url: r.name, status: r.responseStatus })),
         };
-      });
+      }, route);
       report.pages.push(result);
       if (
-        result.path !== route ||
+        result.path !== new URL(base + route).pathname ||
         !result.h1 ||
         result.scrollWidth > result.width ||
         result.footerBrandVisible === false ||
