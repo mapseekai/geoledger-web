@@ -3,7 +3,7 @@ title: "HTTP 业务 API 参考"
 linkTitle: "HTTP 业务 API"
 description: "查阅 GeoLedger 公开 HTTP JSON 接口（POST /api/v1/{operation}）的完整操作目录、请求字段契约、空值语义与状态码规范。"
 weight: 20
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 除了 gRPC 与四语言 SDK 外，`geoledger-server` 还原生提供基于 JSON 的公开 **HTTP 业务 API**（默认监听在 `http://127.0.0.1:7881`）。所有业务操作统一采用 **`POST /api/v1/{operation}`** 路由，其中 `{operation}` 为 `snake_case` 操作名。
@@ -43,14 +43,14 @@ lastmod: 2026-10-29
 | `get_workspace` | 工作区生命周期 | `project`、`workspace` | 返回工作区的 `base_revision`、当前 `version` 与 `status`（`open` / `published` / `discarded`） |
 | `save` | 草稿编辑 | `project`、`workspace`、`expected_workspace_version`、`edits`、可选 `schema_edits` | 在单事务内原子保存要素增删改与字段定义意图，推进工作区 `version`，返回 `{version, changes, warnings}` |
 | `discard` | 工作区生命周期 | `project`、`workspace`、`expected_workspace_version` | 丢弃开放工作区中的未发布草稿，状态变为 `"discarded"` |
-| `features` | 数据与结构查询 | `project`、`dataset`、可选 `workspace` 或 `revision`、可选 `feature_id`、`bbox`、`after`、`limit` | 当指定 `feature_id` 时返回单个 GeoJSON `Feature`；否则返回 `FeatureCollection` 页对象（含 `features`、`revision`、可选 `workspace_version`、`next_after`、`crs`） |
+| `features` | 数据与结构查询 | `project`、`dataset`、可选 `workspace` 或 `revision`、可选 `feature_id`、`bbox`、`after`、`limit` | 当指定 `feature_id` 时返回带查询元数据的单个 GeoJSON `Feature`；否则返回 `FeatureCollection` 页对象（含 `features`、`revision`、`workspace_version`、`next_after`、`crs`） |
 | `schema` | 数据与结构查询 | `project`、`dataset`、可选 `workspace` 或 `revision` | 返回指定修订或工作区上下文下的字段定义 `{revision, workspace_version?, fields: [{name, type, nullable, editable}]}` |
 | `workspace_summary` | 差异与冲突审阅 | `project`、`workspace` | 返回工作区变更汇总 `{version, total: {added, deleted, modified}, datasets: [...], schema_changes: [...]}` |
 | `commit_summary` | 历史与审计 | `project`、`revision` | 返回指定历史修订的变更汇总 `{revision, total, datasets, schema_changes}` |
 | `diff` | 差异与冲突审阅 | `project`、`workspace`、可选 `after`、`limit` | 分页返回工作区相对于 `base_revision` 的要素差异 `changes` 与字段变更 `schema_changes` |
 | `conflicts` | 差异与冲突审阅 | `project`、`workspace`、可选 `after`、`limit` | 分页返回工作区相对于当前项目 `HEAD` 的三方合并冲突列表（含 `head`、`version`、`total`、`conflicts`、`next_after`） |
 | `resolve` | 差异与冲突审阅 | `project`、`workspace`、`expected_workspace_version`、`expected_head`、`resolutions` | 提交冲突要素的完整最终 Feature 选择，返回 `{head, version, remaining_conflicts}` |
-| `rebase` | 差异与冲突审阅 | `project`、`workspace`、`expected_workspace_version`、`expected_head`、可选 `resolutions` | 确认所有冲突已解决并将工作区 `base_revision` 更新为 `expected_head` |
+| `rebase` | 差异与冲突审阅 | `project`、`workspace`、`expected_workspace_version`、`expected_head`、`resolutions` | 确认所有冲突已解决并将工作区 `base_revision` 更新为 `expected_head`；无待提交裁决时传 `resolutions: []` |
 | `publish` | 原子发布 | `project`、`workspace`、`expected_workspace_version`、`request_id`、`message` | 执行三方合并并在单事务内原子提交正式数据、历史、字段 DDL、回执与审计，返回 `{revision, workspace, version, status: "published", changes}` |
 | `history` | 历史与审计 | `project`、可选 `after`（整数，默认 `0`）、`limit` | 按修订号升序返回提交历史页对象 `{commits: [...], next_after}` |
 | `commit` | 历史与审计 | `project`、`revision`、可选 `after`、`limit` | 分页返回指定修订中发生变动的要素前后状态（`before` / `after`）与 `schema_changes` |
@@ -67,10 +67,19 @@ lastmod: 2026-10-29
 | `save.expected_workspace_version` | 必填 | 工作区当前的乐观编辑版本号（非负整数）；与服务端当前 `version` 不一致时返回 `409 Conflict` |
 | `save.edits` | 默认 `[]` | 单次请求支持 `1–100` 项（若仅保存 `schema_edits` 可为空数组）。每项为 `{"dataset": "<uuid>", "feature_id": "<id>", "feature": <GeoJSON Feature 或 null>}`；`feature` 为对象时执行完整要素替换，为 `null` 时执行显式删除 |
 | `save.schema_edits` | 可选 | **三态语义**：省略该字段或传 `null` 表示**保留**工作区已保存的字段意图；传空数组 `[]` 表示**撤销并清空**全部字段意图；传非空数组 `[{"dataset": "...", "add": [...], "drop": [...]}]` 表示**完整替换**字段意图 |
+| `rebase.resolutions` | 必填 | 裁决要素数组；已通过 `resolve` 处理所有冲突或没有冲突时传空数组 `[]`，不能省略 |
 | `publish.request_id` | 必填 | 标识本次发布意图的 UUID。超时或断连重试时**必须原样重用同一个 `request_id`、`expected_workspace_version` 与 `message`** |
 | `features.revision` 与 `workspace` | 可选且**互斥** | 两者均省略时读取项目当前 `HEAD`；传 `revision` 时读取固定历史修订快照；传 `workspace` 时读取该工作区（开放状态读取基线叠加草稿，已发布状态读取其发布修订） |
 | `features.bbox` | 可选 | 长度为 4 的数值数组 `[minX, minY, maxX, maxY]`，坐标必须使用该数据集声明的原始 `crs` |
 | `limit` | 默认 `100` | 分页大小，取值范围 `1–1000`（同时受单次响应编码字节预算约束） |
+
+当 HTTP `features` 请求指定 `feature_id` 时，单个要素响应的顶层还包含查询元数据 `revision`、`workspace_version` 和 `crs`。这些字段不属于保存请求接受的 Feature 结构；直接把整个响应传给 `save` 或 `resolve` 会返回 `400 invalid JSON request`。请保留完整属性与几何，只提取 `type`、`id`、`properties`、`geometry` 四个字段后再修改和提交。例如，在 Python 中从已解析的响应构造待编辑要素：
+
+```python
+feature = {key: response[key] for key in ("type", "id", "properties", "geometry")}
+```
+
+读取 `FeatureCollection` 页时，查询元数据位于集合顶层；`features` 数组内的要素不带这些查询字段。
 
 ## 4. 请求与响应示例
 

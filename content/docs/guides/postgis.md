@@ -81,7 +81,7 @@ CREATE INDEX IF NOT EXISTS roads_geom_gist
 完成绑定后，建议在测试环境中执行一次端到端验证：
 
 1. **读取源表要素**：通过控制台或 `features` 接口读取几条要素，确认主键值、整数/小数属性精度、几何坐标及原始 `crs` 与源表完全一致。
-2. **通过工作区发布修改**：创建一个工作区，修改其中一条测试要素的属性并保存。此时直接用 SQL 查询 `public.roads` 原表，验证**未发布草稿不会污染原表**。
+2. **通过工作区发布修改**：创建一个工作区，修改其中一条测试要素的属性并保存。若通过 HTTP 的 `feature_id` 查询读取单个要素，先按 [HTTP 业务 API]({{< relref "/docs/reference/http/" >}}) 提取四个 Feature 字段，去掉查询元数据。此时直接用 SQL 查询 `public.roads` 原表，验证**未发布草稿不会污染原表**。
 3. **验证原子发布写回**：将工作区发布为新修订后，同时核对以下三处结果：
    - 直接用 SQL 查询 `public.roads`，确认该行已更新为新属性值，且几何 SRID 未被改变。
    - 指定新修订号查询 GeoLedger `features`，返回更新后的要素。
@@ -128,7 +128,7 @@ GeoLedger 在源表上挂接以下三个专用触发器，并在元数据表 `gl
 - **写入保护与防漂移检查**：业务表被纳管期间，所有业务增删改都应通过 GeoLedger 工作区发布。源表上的保护触发器会拦截绕过 GeoLedger 的普通 SQL 直接写入；同时，GeoLedger 在读取和发布前会校验绑定表的 OID、列结构签名与变更跟踪表（`gl_source_changes`）。`gl_source_track` 是触发函数。若检测到表结构被私自篡改或触发器被绕过，系统将明确拒绝读写以保护数据完整性，而不会静默覆盖数据。
 - **解除绑定（删除数据集或项目）**：当在 GeoLedger 中调用 `delete_dataset` 或 `delete_project` 时，系统会移除保护触发器并清理 GeoLedger 内部的版本历史记录，但**原有的 PostGIS 业务表及其当前最新数据会完好保留**。
 - **备份与跨环境迁移差异**：
-  - **PostgreSQL 原生备份（`pg_dump` / PITR）**：必须将源业务表、GeoLedger 系统表（`gl_*`）与触发器放在同一个数据库备份中一并恢复。
+  - **PostgreSQL 原生备份（`pg_dump` / PITR）**：必须将源业务表、GeoLedger 系统表（`gl_*`）与触发器放在同一个数据库备份中一并恢复。`pg_restore` 到新库后，先启动隔离服务，让它校验并重新绑定源表，再进行数据库比对；详见[备份与恢复]({{< relref "/docs/operations/backup/" >}})。
   - **逻辑导出与导入（`export` / `import`）**：逻辑导出包含完整版本数据，但 `import` 到新环境时会将其恢复为 GeoLedger **内部自建数据集**，不会自动跨库重建外部业务表绑定。详见 **[备份、导出与恢复]({{< relref "/docs/operations/backup/" >}})**。
 
 ## 实现依据

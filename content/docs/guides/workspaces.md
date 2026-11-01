@@ -24,6 +24,8 @@ lastmod: 2026-11-01
 
 如果要修改已有要素，**请先在该工作区上下文下读取目标要素的完整 GeoJSON Feature**。GeoLedger 通过数据集内唯一的稳定字符串 `id` 识别要素身份——若需修改要素名称，请调整 `properties` 中的业务字段，而不要通过更换要素 `id` 来代替属性修改。
 
+使用 HTTP `features` 的 `feature_id` 查询时，单个要素响应还附带 `revision`、`workspace_version` 和 `crs` 元数据。提交修改前，请从响应中提取 `type`、`id`、`properties`、`geometry` 四个字段；不要将这些元数据一起传给 `save` 或 `resolve`。提取示例见 [HTTP 业务 API]({{< relref "/docs/reference/http/" >}})。
+
 ## 步骤 2：保存要素修改（全量替换与分批写入）
 
 向工作区保存草稿时，需遵守以下写入契约：
@@ -132,7 +134,7 @@ lastmod: 2026-11-01
 }
 ```
 
-3. **更新工作区基准（`rebase`）**：当 `remaining_conflicts` 降为 `0` 后，调用 `rebase` 将工作区的 `base_revision` 推进到最新 `HEAD`。
+3. **更新工作区基准（`rebase`）**：当 `remaining_conflicts` 降为 `0` 后，调用 `rebase` 将工作区的 `base_revision` 推进到最新 `HEAD`。使用 HTTP API 时，请在请求体中显式传入 `resolutions: []`；该字段不能省略。
 
 > **为什么会出现 `stale_resolution`？**
 > 冲突裁决依据当时的 `HEAD` 和工作区版本。如果裁决后共享 `HEAD` 推进，或工作区又成功执行 `save`，已有裁决就会标记为 `stale_resolution`（已过期）；即使变动发生在其他要素，也需要重新审阅。此时请重新读取最新的 `base` / `current` / `draft` 确认，切勿仅把版本号盲目改为最新值强行覆盖。

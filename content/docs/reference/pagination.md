@@ -22,7 +22,7 @@ lastmod: 2026-11-01
 | **`audit`** | `events` | 64 位整数游标（最后一条记录的 `id`，按 `id > after` 升序） | 仅项目 `owner` 可读；每次请求在独立快照中读取，可保存最后 `id` 轮询新事件 |
 
 > **特殊说明**：
-> 1. 当 `features` 传入 `feature_id` 时，HTTP 返回单个 GeoJSON `Feature`；gRPC、`gl call` 与四语言 SDK 返回包含该要素的 `features` 数组的页对象。
+> 1. 当 `features` 传入 `feature_id` 时，HTTP 返回带查询元数据的单个 GeoJSON `Feature`；再次保存前需按 [HTTP 业务 API]({{< relref "/docs/reference/http/" >}}) 提取 Feature 字段。gRPC、`gl call` 与四语言 SDK 返回包含该要素的 `features` 数组的页对象。
 > 2. HTTP 的 `list_projects`、`list_datasets`、`list_members` 与 `list_workspaces` 返回资源数组；gRPC 和 `gl call` 分别用 `projects`、`datasets`、`members`、`workspaces` 字段包装。SDK 便捷方法返回各语言的资源列表。
 
 ## 2. 精确的终页判定信号（`next_after`）

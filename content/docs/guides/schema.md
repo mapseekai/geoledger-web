@@ -111,7 +111,7 @@ lastmod: 2026-11-01
 如果工作区带有未发布的 `schema_edits`，且期间项目的共享 `HEAD` 已被其他工作区推进，此时直接调用 `publish` 或携带字段意图执行 `rebase` 会被明确拒绝（返回 `409 Conflict`），同时**完整保留你的工作区草稿**。请按以下步骤安全处理：
 
 1. 调用 `save_changes` 并显式传入空数组 `schema_edits = []`，先撤销当前工作区基于旧基线的字段意图（如有需要，先记录草稿中已填写的新字段属性值）。
-2. 执行 `rebase` 将工作区的 `base_revision` 更新到最新 `HEAD`。
+2. 执行 `rebase` 将工作区的 `base_revision` 更新到最新 `HEAD`。使用 HTTP API 且没有待提交裁决时，显式传入 `resolutions: []`。
 3. 读取最新 `HEAD` 下的 `schema`，核对他人是否已经做了表结构调整，然后重新提交基于最新基线的 `schema_edits` 并发布。
 
 ### 如何撤销已发布的字段变更？
