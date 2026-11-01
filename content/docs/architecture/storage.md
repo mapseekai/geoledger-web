@@ -3,7 +3,7 @@ title: "空间存储布局与历史归档设计"
 linkTitle: "空间存储与历史布局"
 description: "深入解析存储格式 19 的每数据集独立分表架构、增量历史归档、SQLite/PostGIS 双后端索引机制以及自定义存储适配器契约。"
 weight: 40
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 在设计空间数据的版本存储时，如果每次发布都把整张图层复制一份全量快照，存储空间与写入时间都会随数据集规模急剧膨胀；反之，如果把所有要素的所有历史版本混杂在单张大表中，又会拖慢高频的当前最新状态（`HEAD`）查询。
@@ -23,7 +23,7 @@ GeoLedger 的**存储格式 `19`** 采用 **“当前状态分表存储 + 增量
 - **显示名称与物理表解耦**：数据集的显示名称可以包含中文、空格并随时通过 `rename_dataset` 修改，底层物理表名始终保持稳定，无需在重命名时锁表重建。
 - **双轨几何存储（精确快照 + 原生空间索引）**：
   - `feature_id` 为表主键。
-  - `properties` 保存精确的 UTF-8 JSON 属性文本（完整保留 64 位大整数与原始字段顺序）。
+  - `properties` 保存 UTF-8 JSON 属性文本，保留受支持的 64 位整数精度；JSON 对象字段的原始顺序不是读写契约。
   - `geometry_json` 保存规范化后的原始 GeoJSON 几何文本，用于无损读取响应、版本差异对比与跨后端逻辑导出。
   - **原生几何列（`geom` / `geom_z`）**：专门服务于空间包络框（`bbox`）索引检索。
 
@@ -51,13 +51,13 @@ GeoLedger 的**存储格式 `19`** 采用 **“当前状态分表存储 + 增量
 
 ## 5. 自定义存储后端的扩展契约（Conformance Suite）
 
-如果你希望将 GeoLedger 适配到其他具备 ACID 事务能力的数据库，只需实现 `geoledger_engine::repository` 中定义的仓储能力 Trait（参见 **[整体架构]({{< relref "/docs/architecture/overview/" >}})**），并通过 `crates/engine/tests/conformance.rs` 中的统一一致性测试套件。一个合格的存储后端必须严格满足以下十项核心不变量：
+如果你希望将 GeoLedger 适配到其他具备 ACID 事务能力的数据库，需要实现 `geoledger_engine::repository` 中定义的仓储能力 Trait，并通过 `Application::with_backend` 接入（参见 **[整体架构]({{< relref "/docs/architecture/overview/" >}})**）。现有 `crates/engine/tests/conformance.rs` 的 fixture 仅选择内置 SQLite 或 PostGIS；新后端需要接入测试 fixture 和服务端选择，运行相同的业务场景，并补充事务失败、锁等待、崩溃恢复与容量测试。一个合格的存储后端必须严格满足以下十项核心不变量：
 
 1. **单事务原子性**：未调用 `commit` 即被丢弃（Drop）的事务对象必须回滚全部写入。
 2. **并发锁串行化**：`project_head(lock=true)` 串行化同项目并发发布并在获锁后读取最新 `HEAD`；`workspace_state(write=true)` 串行化同工作区写入。
 3. **跨表同提交**：正式要素、历史有效期、提交明细、Schema 历史、`HEAD`、工作区状态、幂等回执与审计记录必须在同一事务内共同提交。
 4. **不可变发布回执**：按 `(project, subject, request_id)` 唯一持久保存已提交回执，支持断连重放。
-5. **半开区间可见性**：严格按 `valid_from <= revision AND (valid_to IS NULL OR revision < valid_to)` 还原历史快照，保留删除墓碑。
+5. **半开区间可见性**：严格按 `valid_from <= revision AND (valid_to IS NULL OR revision < valid_to)` 还原历史快照；删除以旧正文的结束区间、当前行的缺失和提交变更记录表达。
 6. **草稿空间遮蔽**：工作区 `bbox` 查询必须先以草稿增量覆盖基线要素，再执行空间过滤，确保已删除或移出范围的草稿遮蔽原位置。
 7. **事务私有合并暂存（Merge Stage）**：`begin_merge` 与 `stage` 在事务私有暂存区中验证候选，发布提交后才转为公开历史。
 8. **期限（Deadline）传播与确定性报告**：所有锁等待、查询与提交均服从请求剩余期限，并准确区分明确拒绝与结果未知（`uncertain`）。

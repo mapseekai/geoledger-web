@@ -2,7 +2,7 @@
 title: "文档中心"
 description: "GeoLedger 官方技术文档：涵盖入门教程、任务操作指南、API 与配置参考、系统架构解析及生产运维手册。"
 weight: 10
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 type: docs
 icon: fa-solid fa-book-open
 sidebar_root_for: self
@@ -33,6 +33,6 @@ cascade:
 - **技术参考（Reference）**：准确定义 HTTP 接口、四语言 SDK、CLI 命令、游标分页契约、环境变量默认值以及版本兼容性边界。
 - **概念与架构（Architecture & Explanation）**：深入阐述 GeoLedger 的内部机制、版本可见性模型、三方合并规则、空间存储表结构以及单事务一致性保证。
 
-> **版本基线提示**：当前文档基于 GeoLedger `v0.3.0-alpha.7`（源码提交 `5bf353c`，存储格式版本 `19`）编写与核对。在生产或测试环境中执行操作前，建议先阅读[版本、兼容性与验证范围]({{< relref "/docs/reference/compatibility/" >}})。正式版本发布说明与主分支工程演进记录请参阅[项目动态（Blog）]({{< relref "/blog/" >}})。
+> **版本基线提示**：当前文档基于 GeoLedger `v0.3.0-alpha.7`（源码提交 `5bf353c`，存储格式版本 `19`）编写与核对。在生产或测试环境中执行操作前，建议先阅读[版本、兼容性与验证范围]({{< relref "/docs/reference/compatibility/" >}})。已发布版本说明与主分支工程演进记录请参阅[项目动态（Blog）]({{< relref "/blog/" >}})。
 
 ## 按章节浏览

@@ -3,7 +3,7 @@ title: "配置参数参考（环境变量与命令行）"
 linkTitle: "配置参数"
 description: "查阅 geoledger-server、Web 控制台、远程 CLI（gl）以及生产部署模板的全部环境变量、命令行选项、默认值与安全边界。"
 weight: 40
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 本页汇总了 GeoLedger 服务端（`geoledger-server`）、Web 控制台、远程 CLI（`gl`）以及生产编排模板支持的全部配置项。
@@ -21,7 +21,9 @@ lastmod: 2026-10-29
 | `GL_DB_POOL_SIZE` | `--db-pool-size` | `20` | PostGIS 模式下的业务数据库连接池最大容量 |
 | `GL_DB_STATEMENT_TIMEOUT_SECS` | `--db-statement-timeout-secs` | `30` | PostgreSQL 单条 SQL 语句执行超时上限（秒） |
 | `GL_DB_LOCK_TIMEOUT_SECS` | `--db-lock-timeout-secs` | `10` | PostgreSQL 事务锁等待超时上限（秒） |
-| `GL_SPATIALITE_EXTENSION` | `--spatialite-extension` | 平台自动发现 | SQLite 模式下管理员指定的可信 `mod_spatialite` 动态库路径（加载完成后立即关闭 SQLite 动态加载权限） |
+| `GL_SPATIALITE_EXTENSION` | *(仅环境变量)* | `mod_spatialite` | SQLite 模式下管理员指定的可信 `mod_spatialite` 动态库路径（加载完成后立即关闭 SQLite 动态加载权限） |
+
+例如，可在启动服务前设置 `export GL_SPATIALITE_EXTENSION=/path/to/mod_spatialite`，路径应指向当前主机可信的扩展库。
 
 > **注意**：当显式设置 `GL_STORAGE=postgis` 时，若数据库连接或证书校验失败，服务端会立即报错退出，绝不会静默回退到本地 SQLite。
 

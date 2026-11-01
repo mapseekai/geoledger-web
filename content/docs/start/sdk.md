@@ -3,7 +3,7 @@ title: "教程：使用 Python SDK 发布并读回要素"
 linkTitle: "Python SDK 教程"
 description: "从源码安装官方 Python 客户端，以编程方式创建项目、保存要素草稿、原子发布并按修订号精确读取数据。"
 weight: 40
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 除了使用 Web 控制台进行交互式编辑外，你还可以通过 GeoLedger 官方提供的四语言 SDK（Rust、Go、TypeScript / Node.js、Python）将空间版本管理无缝集成到数据处理流水线或业务后端中。
@@ -90,7 +90,7 @@ with Client(endpoint, api_key) as client:
 
 - **自动维护草稿版本**：`draft` 工作区句柄在内存中自动维护乐观并发版本（`expected_workspace_version`）。每次调用 `draft.save(...)` 成功后，句柄会自动递增内部版本号。
 - **精确保持 64 位整数**：请注意属性中的 `"sequence": 9007199254740993`（超过了 IEEE 754 双精度浮点数的 `2^53 - 1` 安全整数上限）。GeoLedger 在传输与存储层将 GeoJSON 作为精确文本处理，确保大整数在保存、合并和读取后分毫不差。
-- **固定修订读取**：`client.features(..., revision=receipt["revision"])` 明确指定了刚刚发布的修订号，即使后续其他工作区继续发布新版本，按该修订号读取的结果也始终保持不变。
+- **固定修订读取**：`client.features(..., revision=receipt["revision"])` 指定刚刚发布的修订号，后续正常发布不会改变这个快照。数据集或项目被删除时，相关历史可能被清理；版本历史不能替代独立备份。
 
 ## 步骤 3：运行脚本并验证结果
 

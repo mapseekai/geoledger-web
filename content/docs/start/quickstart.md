@@ -3,7 +3,7 @@ title: "快速开始：启动本地测试环境"
 linkTitle: "快速开始"
 description: "通过 Docker Compose 从固定源码启动包含服务端、CLI 与 Web 控制台的本地环境，并完成首次登录。"
 weight: 20
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 在本篇教程中，你将使用 Docker Compose 在本地构建并启动一套完整的 GeoLedger 服务（包含 Rust 服务端、SpatiaLite 运行时、命令行工具 `gl` 与 Web 控制台），验证服务就绪状态，并完成管理员首次登录。
@@ -59,7 +59,14 @@ curl --fail http://127.0.0.1:7881/ready
 {"ok":true}
 ```
 
-此时本地环境的三个服务端点均已就绪：
+`/ready` 只确认后端就绪。统一容器还会检查控制台的 `/api/health`；请确认以下命令中容器状态为 `healthy`，再打开控制台：
+
+```sh
+docker compose ps
+curl --fail http://localhost:3000/api/health
+```
+
+默认端点如下；gRPC 连通性可在创建 API Key 后用 `gl info` 或 [Python SDK 教程]({{< relref "/docs/start/sdk/" >}})单独验证：
 
 | 服务端点 | 默认本地地址 | 用途说明 |
 |---|---|---|
@@ -71,7 +78,7 @@ curl --fail http://127.0.0.1:7881/ready
 
 ## 步骤 4：获取初始凭据并完成首次登录
 
-当未通过环境变量显式指定 `GL_ADMIN_PASSWORD` 时，GeoLedger 会在首次启动时自动生成高强度随机管理员密码，并以只读私有权限（`0600`）保存在容器数据卷的 `/data/initial-admin-<id>.json` 文件中。
+当未通过环境变量显式指定 `GL_ADMIN_PASSWORD` 时，GeoLedger 会在首次启动时自动生成高强度随机管理员密码，并以所有者可读写、其他用户无权限的私有模式（`0600`）保存在容器数据卷的 `/data/initial-admin-<id>.json` 文件中。
 
 在终端运行以下命令读取初始管理员凭据：
 

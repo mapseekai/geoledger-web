@@ -3,7 +3,7 @@ title: "故障诊断与常见问题排查"
 linkTitle: "故障诊断"
 description: "按容器启动失败、控制台登录报错、401/404 权限问题、409 版本冲突、request_id 幂等错误及 413/429/504 资源限制快速定位并解决问题。"
 weight: 40
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 当你在部署、登录或调用 API 时遇到异常，建议先记录以下四个关键信息，再对照下文对应的故障分支进行排查：
@@ -88,7 +88,7 @@ lastmod: 2026-10-29
 
 ### 原因与解决方案
 - **原因**：客户端复用了上一次发布的 `request_id`（UUID），但修改了请求中的 `expected_workspace_version` 或发布说明 `message`。
-- **解决**：找回首次发起该发布时的原始 `expected_workspace_version` 和原始 `message` 文本，搭配原 `request_id` 重新提交，即可安全获取发布回执（详见 **[发布结果恢复]({{< relref "/docs/guides/publication-recovery/" >}})**）。
+- **解决**：找回首次发起发布时的完整原始请求和身份，使用原负载重试。若回执存在且调用者仍有读取权限，服务端会返回原回执；否则应根据响应继续排查（详见 **[发布结果恢复]({{< relref "/docs/guides/publication-recovery/" >}})**）。
 
 ---
 
@@ -113,7 +113,7 @@ lastmod: 2026-10-29
 
 ### 排查与解决方案
 1. **连接与 TLS 校验失败**：当配置为 `postgis` 时，GeoLedger 绝不会静默回退到 SQLite。检查 `GL_DATABASE_URL` 的证书路径（`sslrootcert`）、主机名是否匹配证书 SAN，以及 PostgreSQL 是否已启用 `postgis` 扩展。
-2. **存量表注册被拒绝**：核对操作者是否同时具备平台管理员与项目写权限；核对源表是否具备单列主键、明确子类型的 `geometry` 列、有限数值坐标，以及服务数据库账号是否拥有该表的所有者权限以创建保护触发器（详见 **[PostGIS 表纳管指南]({{< relref "/docs/guides/postgis/" >}})**）。
+2. **存量表注册被拒绝**：核对操作者是否同时具备平台管理员与项目写权限；核对源表是否为无 RLS、重写规则和继承的持久独立普通表，是否具备单列主键、明确子类型的 `geometry` 列与有限数值坐标，以及服务数据库账号是否拥有该表的所有者权限以创建保护触发器（详见 **[PostGIS 表纳管指南]({{< relref "/docs/guides/postgis/" >}})**）。
 
 ## 实现依据
 

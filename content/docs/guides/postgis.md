@@ -3,7 +3,7 @@ title: "纳管已有 PostGIS 业务表"
 linkTitle: "PostGIS 表纳管"
 description: "在不搬迁存量数据的前提下，将 PostgreSQL/PostGIS 中的既有业务表注册为 GeoLedger 数据集，实现工作区编辑、事务写回与历史追溯。"
 weight: 30
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 在许多生产系统中，企业已经拥有正在运行的 PostgreSQL + PostGIS 空间业务表（如道路网、地块边界、管网设施），并有报表或下游服务直接读取这些表。
@@ -19,9 +19,10 @@ GeoLedger 的 **PostGIS 表纳管（Table Registration）** 能力允许你在�
 | 检查维度 | 契约要求与说明 |
 |---|---|
 | **操作者身份** | 调用方必须同时具备 **平台管理员（`platform_admin`）** 身份以及目标项目的 **可写成员（`owner` 或 `editor`）** 权限 |
+| **表类型与行可见性** | 必须是持久的独立普通表，不能启用行级安全（RLS）或重写规则，也不能参与表继承或分区 |
 | **主键列（`id_column`）** | 必须为**单列主键**，支持整数、文本（`text` / `varchar`，UTF-8 编码不超过 256 字节且不含控制字符）或 `uuid` 类型（支持普通主键或可延迟主键） |
-| **几何列（`geometry_column`）** | 必须为声明了具体几何子类型（`Point`、`LineString`、`Polygon` 或对应的 `Multi*`）与坐标维度（XY / XYZ）的 PostGIS `geometry` 列；若列声明 SRID 为 `0`，则全表各行几何的 SRID 必须一致 |
-| **属性列** | 其余普通可写列自动映射为要素属性（最多 256 列），支持通过[版本化字段定义]({{< relref "/docs/guides/schema/" >}})新增或删除普通可空列 |
+| **几何列（`geometry_column`）** | 必须为声明了具体几何子类型（`Point`、`LineString`、`Polygon` 或对应的 `Multi*`）与坐标维度（XY / XYZ）的 PostGIS `geometry` 列；若列声明 SRID 为 `0`，每个非空几何的 SRID 也必须为 `0` |
+| **属性列** | 其余普通可写列自动映射为要素属性（最多 256 列）；生成列和非主键 identity 列不受支持。可通过[版本化字段定义]({{< relref "/docs/guides/schema/" >}})新增或删除普通可空列 |
 | **数据库账号权限** | GeoLedger 运行账号需具备对该业务表的 `SELECT`、`INSERT`、`UPDATE`、`DELETE` 以及**表所有权（或等效的父角色权限）**，以便在纳管和发布时执行锁表、维护保护触发器与必要的索引（仅授予 `TRIGGER` 权限不足以覆盖完整生命周期） |
 
 > **性能与锁等待提示**：注册纳管表时，GeoLedger 会以有界分页只读扫描源表，校验每行几何的有限数值与 GeoJSON 结构兼容性，并在缺少兼容主键排序索引时创建窄 ID 索引。因此，大表首次注册的耗时取决于源表数据规模、现有索引与锁等待情况，建议在业务低峰期执行。
@@ -115,7 +116,7 @@ GeoLedger 在源表上挂接以下三个专用触发器，并在元数据表 `gl
 | `gl_versioned_track` | `AFTER INSERT OR UPDATE OR DELETE`（行级）调用 `public.gl_source_track('<pk>')` | 设置为 `ENABLE ALWAYS`，即使在逻辑复制或特殊会话下也能精准捕获行级变更 |
 | `gl_versioned_truncate` | `AFTER TRUNCATE`（语句级）调用 `public.gl_source_track()` | 设置为 `ENABLE ALWAYS`，严防源表被外部清空 |
 
-每个触发器均打上带有数据集 UUID 的注释标签（`COMMENT ON TRIGGER ... IS 'geoledger:<uuid>'`）。
+每个触发器均打上相同的独立绑定标识（`COMMENT ON TRIGGER ... IS 'geoledger:<uuid>'`）；这个 UUID 是纳管时新生成的标识，不是数据集 UUID。
 
 在每次通过工作区向源表写入前，GeoLedger 均会执行 `ensure_source_clean` 检查。若检测到以下任何一种异常，系统将立即阻断写入并返回 `409 Conflict ("business table changed outside GeoLedger; reconcile the source before publishing")`：
 - 源表字段类型、列数、几何类型或 SRID 被外部 DDL 变更；
@@ -124,7 +125,7 @@ GeoLedger 在源表上挂接以下三个专用触发器，并在元数据表 `gl
 
 ## 存量表运维与生命周期注意事项
 
-- **写入保护与防漂移检查**：业务表被纳管期间，所有业务增删改都应通过 GeoLedger 工作区发布。源表上的保护触发器会拦截绕过 GeoLedger 的普通 SQL 直接写入；同时，GeoLedger 在读取和发布前会校验绑定表的 OID、列结构签名与变更跟踪表（`gl_source_track`）。若检测到表结构被私自篡改或触发器被绕过，系统将明确拒绝读写以保护数据完整性，而不会静默覆盖数据。
+- **写入保护与防漂移检查**：业务表被纳管期间，所有业务增删改都应通过 GeoLedger 工作区发布。源表上的保护触发器会拦截绕过 GeoLedger 的普通 SQL 直接写入；同时，GeoLedger 在读取和发布前会校验绑定表的 OID、列结构签名与变更跟踪表（`gl_source_changes`）。`gl_source_track` 是触发函数。若检测到表结构被私自篡改或触发器被绕过，系统将明确拒绝读写以保护数据完整性，而不会静默覆盖数据。
 - **解除绑定（删除数据集或项目）**：当在 GeoLedger 中调用 `delete_dataset` 或 `delete_project` 时，系统会移除保护触发器并清理 GeoLedger 内部的版本历史记录，但**原有的 PostGIS 业务表及其当前最新数据会完好保留**。
 - **备份与跨环境迁移差异**：
   - **PostgreSQL 原生备份（`pg_dump` / PITR）**：必须将源业务表、GeoLedger 系统表（`gl_*`）与触发器放在同一个数据库备份中一并恢复。

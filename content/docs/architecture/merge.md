@@ -3,7 +3,7 @@ title: "三方合并与冲突处理机制"
 linkTitle: "三方合并与冲突"
 description: "深入解析 GeoLedger 的属性级三方合并规则、几何整体比较策略、冲突解决上下文绑定以及字段结构变更的并发控制。"
 weight: 30
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 在多人协作维护同一份空间数据集时，如果简单采用“最后写入者胜出（Last-Write-Wins）”直接用工作区草稿覆盖线上数据，就会静默冲掉其他成员刚刚发布的合法修改。
@@ -50,16 +50,16 @@ GeoLedger 在 `geoledger-core` 中实现了确定性的**三方合并**（Three-
 1. `expected_head`：你审阅冲突时所依据的项目 `HEAD` 修订号。
 2. `expected_workspace_version`：当前工作区的草稿版本号。
 
-服务端会将该解决选择绑定在 `(expected_head, expected_workspace_version)` 上。如果在你完成裁决后、正式调用 `publish` 或 `rebase` 之前：
-- 其他人又发布了新修订导致项目 `HEAD` 再次推进，且该要素在最新 `HEAD` 下又发生了变化；
-- 或者你自己在工作区中又重新编辑覆盖了该要素；
+服务端在 `resolve` 时核对 `expected_head` 和 `expected_workspace_version`，并记录裁决依据的 `HEAD`。如果在你完成裁决后、正式调用 `publish` 或 `rebase` 之前：
+- 其他人发布新修订，导致项目 `HEAD` 再次推进，即使该冲突要素本身没有改变；
+- 或者该工作区又成功执行了 `save`，即使保存的是其他要素或字段意图；
 
-那么此前的冲突解决记录就会自动标记为 **`stale_resolution`（已过期）**。这一机制确保任何最终写入正式库的合并结果，都经过了针对最新线上状态的明确审阅。
+那么此前的冲突解决记录就会被标记为 **`stale_resolution`（已过期）**，需要重新读取冲突并审阅。多次 `resolve` 可分批处理冲突；后续 `save` 会使已有裁决整体失效。
 
 ## 4. 冲突分页缓存与字段变更（Schema）的并发边界
 
 - **高效的冲突键缓存（`gl_conflict_cache`）**：
-  当一个大工作区产生数百条冲突时，为了支持快速翻页，GeoLedger 会在项目锁保护下按 `(project, workspace, base_revision, workspace_version, head)` 五元组生成冲突键索引与精确总数 `total`（仅缓存数据集与要素键，不冗余复制大几何正文）。只要这五个版本坐标未变，后续调用 `conflicts` 翻页即可直接按复合游标毫秒级定位本页冲突详情。
+  当一个大工作区产生数百条冲突时，为了支持翻页，GeoLedger 会在项目锁保护下按 `(project, workspace, base_revision, workspace_version, head)` 五元组生成冲突键索引与精确总数 `total`（仅缓存数据集与要素键，不冗余复制大几何正文）。只要这五个版本坐标未变，后续调用 `conflicts` 即可按复合游标定位本页冲突详情。
 - **字段结构变更（`schema_edits`）不执行自动合并**：
   普通要素属性值可以按字段粒度三方合并，但新增或删除数据集字段（`schema_edits`）会影响整个数据集的表结构与历史投影。因此，当带有未发布字段意图的工作区遇到共享 `HEAD` 推进时，引擎采取保守拒绝策略（保留草稿，要求先清空旧字段意图、更新基线并核对最新 Schema 后再重新声明），避免并发 DDL 产生意外的表结构组合（操作步骤详见 **[新增与删除版本化字段]({{< relref "/docs/guides/schema/" >}})**）。
 

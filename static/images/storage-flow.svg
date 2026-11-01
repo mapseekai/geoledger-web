@@ -45,8 +45,9 @@
   </g>
 
   <rect class="node draft" x="390" y="25" width="380" height="98" rx="12"/>
-  <text class="name light" x="580" y="65">工作区草稿增量</text>
-  <text class="detail light-detail mono" x="580" y="96">gl_deltas / gl_workspace_schemas</text>
+  <text class="name light" x="580" y="55">工作区草稿增量</text>
+  <text class="detail light-detail mono" x="580" y="83">gl_workspace_changes</text>
+  <text class="detail light-detail mono" x="580" y="108">gl_workspace_schemas</text>
   <rect class="node stage" x="390" y="165" width="380" height="95" rx="12"/>
   <text class="name accent" x="580" y="204">事务内合并暂存区</text>
   <text class="detail" x="580" y="233">Merge Stage</text>
@@ -63,8 +64,8 @@
   <rect class="node" x="790" y="380" width="330" height="140" rx="12"/>
   <text class="name" x="955" y="414">字段历史 / 幂等回执 / 审计</text>
   <text class="detail mono" x="955" y="446">gl_schema_history</text>
-  <text class="detail mono" x="955" y="473">gl_publication_receipts</text>
-  <text class="detail mono" x="955" y="500">gl_audit</text>
+  <text class="detail mono" x="955" y="473">gl_idempotency</text>
+  <text class="detail mono" x="955" y="500">gl_audit_events</text>
 
   <text class="edge-label" x="400" y="551">归档被覆盖或删除的旧正文</text>
   <rect class="node" x="390" y="610" width="380" height="90" rx="12"/>

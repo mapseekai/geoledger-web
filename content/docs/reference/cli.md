@@ -3,10 +3,10 @@ title: "CLI 命令行参考（gl）"
 linkTitle: "CLI 接入"
 description: "查阅 GeoLedger 远程命令行工具 gl 的构建方式、全局选项、凭据文件安全校验、内置子命令与通用 JSON 调用规范。"
 weight: 25
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
-`gl` 是 GeoLedger 官方提供的远程命令行客户端。它底层基于 Rust SDK（`geoledger-client`）通过 gRPC 连接 `geoledger-server`，既提供了查看服务信息、项目列表、成员与历史的快捷命令，也支持通过 `gl call <operation>` 直接调用全部 30 个业务操作。
+`gl` 是 GeoLedger 官方提供的远程命令行客户端。它底层基于 Rust SDK（`geoledger-client`）通过 gRPC 连接 `geoledger-server`，既提供了查看服务信息、项目列表、成员与历史的快捷命令，也支持通过 `gl call <operation>` 调用公开业务操作。
 
 > **职责区分**：`gl` 是面向日常业务与自动化脚本的**远程 gRPC 客户端**；而数据库物理备份（`backup` / `restore`）与逻辑导入导出（`export` / `import` / `verify`）属于服务端本地管理命令，请通过 `geoledger-server` 执行（详见 **[备份、导出与恢复]({{< relref "/docs/operations/backup/" >}})**）。
 
@@ -56,9 +56,11 @@ cargo build --release --locked --bins
 | `gl projects` | 无 | 调用 `list_projects`（单次请求，`limit = 100`），输出可见项目列表 |
 | `gl members <PROJECT>` | `<PROJECT>`：项目 UUID | 调用 `list_members`（单次请求，`limit = 1000`），输出项目的有效成员列表 |
 | `gl history <PROJECT>` | `<PROJECT>`：项目 UUID<br>`--after <REV>`：起始游标（默认 `0`） | 调用 `history`（单次请求，`limit = 100`），输出一页按修订号升序排列的提交记录与 `next_after` |
-| `gl call <OPERATION>` | `<OPERATION>`：`snake_case` 操作名<br>`--file <PATH>`：JSON 输入路径（默认 `-` 表示标准输入 `stdin`） | 执行任意公开业务操作（请求与响应 JSON 结构与 **[HTTP 业务 API]({{< relref "/docs/reference/http/" >}})** 完全一致） |
+| `gl call <OPERATION>` | `<OPERATION>`：`snake_case` 操作名<br>`--file <PATH>`：JSON 输入路径（默认 `-` 表示标准输入 `stdin`） | 执行公开业务操作；输入使用普通 JSON，响应遵循 gRPC 的 JSON 表示，部分结构与 HTTP 不同 |
 
 > **分页提示**：`projects`、`members` 与 `history` 快捷子命令仅发起单次请求，不会在终端自动循环拉取所有后续分页。当数据量超过单页上限时，请使用 `gl call` 显式传入 `after` 与 `limit` 参数（详见 **[分页与一致性参考]({{< relref "/docs/reference/pagination/" >}})**）。
+
+例如，HTTP 的 `list_projects` 响应是项目数组，而 `gl call list_projects` 输出 `{"projects": [...]}`。指定 `feature_id` 查询时，HTTP 返回单个 Feature，`gl call features` 则将该要素放在页对象的 `features` 数组中。编写脚本时请按实际协议解析响应，参见[分页与一致性参考]({{< relref "/docs/reference/pagination/" >}})。
 
 ## 4. 常用命令示例
 
@@ -98,7 +100,7 @@ printf '%s\n' '{"name":"城市管网巡检"}' \
 - **执行失败（退出码 `1`）**：
   - 若为服务端返回的业务错误（`geoledger_client::Error`），`gl` 会将包含 `code`、`message`、`request_id` 与 `uncertain` 的单行 JSON 写入**标准错误（`stderr`）**。
   - 若为本地参数或文件权限错误，则向 `stderr` 输出 `gl: <错误原因>`。
-- **发布超时后的安全恢复**：当通过 `gl call publish --file publish.json` 发布工作区遇到超时或网络中断时，**请勿修改 `publish.json` 中的 `request_id` 或 `message`**，直接再次运行完全相同的命令即可安全确认原发布回执（详见 **[发布结果恢复]({{< relref "/docs/guides/publication-recovery/" >}})**）。
+- **发布超时后的安全恢复**：当通过 `gl call publish --file publish.json` 发布工作区遇到超时或网络中断时，请保留完整的 `publish.json`，使用同一身份重放。已提交且仍有读取权限时返回原回执；否则可能重新尝试发布或返回错误（详见 **[发布结果恢复]({{< relref "/docs/guides/publication-recovery/" >}})**）。
 
 ## 实现依据
 

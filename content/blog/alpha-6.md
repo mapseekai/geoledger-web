@@ -3,7 +3,7 @@ title: "v0.3.0-alpha.6 发布：精确页级游标与 PostGIS 表注册命名统
 description: "统一 diff、commit、history 与 audit 的同快照页级游标终页判定，将 history 升级为页对象，并将 SDK 表接入方法统一命名为 register_table。"
 summary: "统一 diff、commit、history 与 audit 的同快照页级游标终页判定，将 history 升级为页对象，并将 SDK 表接入方法统一命名为 register_table。"
 weight: 20
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 date: 2026-10-18
 tags: [Release, API]
 ---
@@ -12,7 +12,7 @@ tags: [Release, API]
 
 `v0.3.0-alpha.6` 重点完善了客户端分页协议的确定性与 SDK 命名规范，并扩充了 PostGIS 生产环境的 TLS / SCRAM 安全验收门禁。
 
-> **版本演进说明**：`alpha.6` 发布时采用的是存储格式 `16`；当前最新文档与服务已演进至 **`v0.3.0-alpha.7`（存储格式 `19`）**。升级或接入当前版本时，请以 **[版本与兼容性]({{< relref "/docs/reference/compatibility/" >}})** 为准。
+> **版本演进说明**：`alpha.6` 发布时采用的是存储格式 `16`；本站文档基于 **`v0.3.0-alpha.7` 源码基线（存储格式 `19`）**。升级或接入其他版本时，请以 **[版本与兼容性]({{< relref "/docs/reference/compatibility/" >}})** 为准。
 
 ## 1. 同快照页级游标：告别“靠返回条数猜测终页”
 

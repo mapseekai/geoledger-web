@@ -3,7 +3,7 @@ title: "工作区编辑、冲突解决与原子发布"
 linkTitle: "工作区编辑与发布"
 description: "全面掌握工作区草稿的分批保存、跨数据集差异审阅、三方合并冲突处理、变基（Rebase）与原子发布。"
 weight: 20
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 在 GeoLedger 中，**工作区（Workspace）** 是准备一次业务更新的隔离沙箱。你可以在同一个工作区内跨多个数据集（例如同时编辑 `roads` 道路线与 `stations` 监测点）分批保存要素修改和字段变更，经过差异审阅与冲突解决后，在单次数据库事务中将它们共同发布为一个项目级共享修订（Revision）。
@@ -135,7 +135,7 @@ lastmod: 2026-10-29
 3. **更新工作区基准（`rebase`）**：当 `remaining_conflicts` 降为 `0` 后，调用 `rebase` 将工作区的 `base_revision` 推进到最新 `HEAD`。
 
 > **为什么会出现 `stale_resolution`？**
-> 每次冲突解决结果都严格绑定于当时的 `(expected_head, expected_workspace_version)` 上下文。如果解决了冲突后，在正式发布前共享 `HEAD` 又被其他人推进了一次，或者你再次修改了该要素的草稿，原先的解决选择就会被标记为 `stale_resolution`（已过期）。此时请重新读取最新的 `base` / `current` / `draft` 确认，切勿仅把版本号盲目改为最新值强行覆盖。
+> 冲突裁决依据当时的 `HEAD` 和工作区版本。如果裁决后共享 `HEAD` 推进，或工作区又成功执行 `save`，已有裁决就会标记为 `stale_resolution`（已过期）；即使变动发生在其他要素，也需要重新审阅。此时请重新读取最新的 `base` / `current` / `draft` 确认，切勿仅把版本号盲目改为最新值强行覆盖。
 
 ## 步骤 5：原子发布并验证回执
 

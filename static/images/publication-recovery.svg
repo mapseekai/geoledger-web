@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1160" height="1420" viewBox="0 0 1160 1420" role="img" aria-labelledby="title desc">
   <title id="title">发布故障恢复决策流程</title>
-  <desc id="desc">发布成功后获取回执。明确拒绝时修正问题后发起新发布；结果未知时，在原进程中使用同一句柄和说明重试，或在重启后还原原意图并重放。意图丢失或仍无法确认时，通过 API 核查工作区状态和提交历史。</desc>
+  <desc id="desc">发布成功后获取回执。仅首次请求明确拒绝且没有先前未知结果时，可修正问题并发起新发布。结果未知或重试遇到认证、权限或资源不可见错误时，保留原意图，在恢复凭据或权限后重试。原句柄不可用时还原并重放保存的意图；意图丢失或仍无法确认时，通过 API 核查工作区状态和提交历史。</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow" d="M0 0L10 5L0 10Z"/></marker>
   </defs>
@@ -68,28 +68,29 @@
   <text class="detail mono" x="210" y="346">status: published</text>
 
   <path class="node" d="M580 280L740 335L580 390L420 335Z"/>
-  <text class="name mono" x="580" y="329">err.uncertain</text>
-  <text class="name mono" x="580" y="357">== true ?</text>
-  <text class="branch" x="315" y="410">否 · 明确拒绝</text>
-  <text class="branch branch-accent branch-side" x="600" y="419">是 · 结果未知</text>
+  <text class="name" x="580" y="329">首次请求且</text>
+  <text class="name" x="580" y="357">明确拒绝？</text>
+  <text class="branch" x="315" y="410">是 · 明确拒绝</text>
+  <text class="branch branch-accent branch-side" x="600" y="419">否 · 保留原意图</text>
   <rect class="node" x="45" y="430" width="330" height="120" rx="12"/>
   <text class="name" x="210" y="467">事务确定未提交</text>
   <text class="detail" x="210" y="497">解决冲突、修正参数</text>
   <text class="detail" x="210" y="525">再发起新发布</text>
 
   <path class="node" d="M580 435L740 490L580 545L420 490Z"/>
-  <text class="name" x="580" y="483">客户端进程</text>
-  <text class="name" x="580" y="511">是否仍存活？</text>
-  <text class="branch branch-accent" x="315" y="568">是 · 原进程</text>
-  <text class="branch" x="840" y="475">否 · 已重启</text>
+  <text class="name" x="580" y="483">原工作区句柄</text>
+  <text class="name" x="580" y="511">仍然可用？</text>
+  <text class="branch branch-accent" x="315" y="568">是 · 原句柄</text>
+  <text class="branch" x="840" y="475">否 · 句柄不可用</text>
 
   <rect class="node action" x="45" y="610" width="380" height="105" rx="12"/>
-  <text class="name accent" x="235" y="650">使用原工作区句柄</text>
-  <text class="detail" x="235" y="681">相同 message 再次 publish()</text>
+  <text class="name accent" x="235" y="642">使用原工作区句柄</text>
+  <text class="detail" x="235" y="670">必要时先恢复凭据或权限</text>
+  <text class="detail" x="235" y="699">原 message 再次 publish()</text>
   <path class="node" d="M235 745L395 800L235 855L75 800Z"/>
   <text class="name" x="235" y="793">是否成功</text>
   <text class="name" x="235" y="821">确认？</text>
-  <text class="branch branch-end" x="68" y="783">仍超时</text>
+  <text class="branch branch-end" x="68" y="783">待确认</text>
   <text class="branch branch-accent branch-side" x="255" y="920">是</text>
   <rect class="node" x="45" y="1000" width="380" height="90" rx="12"/>
   <text class="name" x="235" y="1037">成功获取回执</text>
@@ -106,7 +107,7 @@
   <path class="node" d="M925 930L1085 985L925 1040L765 985Z"/>
   <text class="name" x="925" y="978">是否成功</text>
   <text class="name" x="925" y="1006">确认？</text>
-  <text class="branch branch-end" x="1130" y="970">仍不可用</text>
+  <text class="branch branch-end" x="1130" y="970">仍未确认</text>
   <text class="branch branch-accent branch-side" x="945" y="1080">是</text>
   <rect class="node" x="735" y="1110" width="380" height="90" rx="12"/>
   <text class="name" x="925" y="1147">成功获取回执</text>

@@ -3,12 +3,12 @@ title: "确认与恢复中断的发布（幂等重试）"
 linkTitle: "发布结果恢复"
 description: "当发布请求遭遇网络超时、连接中断或客户端进程重启时，利用不可变发布意图（request_id）安全确认结果，杜绝重复发布。"
 weight: 60
-lastmod: 2026-10-29
+lastmod: 2026-11-01
 ---
 
 在分布式系统与网络通信中，客户端调用 `publish` 时可能会遇到连接闪断、网关 `504 Gateway Timeout` 或客户端进程意外重启。此时，**服务端数据库事务可能已经成功提交，也可能在提交前已回滚**。
 
-如果客户端简单地创建一个新工作区重新提交，就可能导致同一批变更被重复发布两次。为了解决这一问题，GeoLedger 在数据库事务内内置了**不可变发布回执**（Publication Receipt）机制：只要你使用原始发布意图（相同的 `request_id`、`expected_workspace_version` 与 `message`）重放请求，服务端就会幂等地返回首次提交的真实回执，而绝不会产生重复修订。
+如果客户端简单地创建一个新工作区重新提交，就可能导致同一批变更被重复发布两次。GeoLedger 在数据库事务内保存**不可变发布回执**（Publication Receipt）：使用同一身份和原始发布意图重放时，若原事务已提交且调用者仍有权读取，服务端返回原回执；若尚未提交，服务端会重新校验并尝试执行。保留原意图可避免因重试本身生成重复修订。
 
 ## 核心要素：一份发布意图包含什么？
 
@@ -37,7 +37,7 @@ lastmod: 2026-10-29
 
 ## 步骤 2：在未重启的同一进程内直接重试
 
-如果你的应用进程仍在运行（或浏览器标签页未关闭），恢复非常简单：
+如果应用仍保留原工作区句柄，或控制台原标签页仍保存发布意图，可以直接重试：
 
 - **使用四语言 SDK**：SDK 的 `Workspace` 句柄在内部自动缓存了未确认的 `request_id`、`expected_workspace_version` 和 `message`。你只需**在同一个工作区句柄上，传入完全相同的发布说明再次调用 `publish`**：
 
@@ -57,12 +57,15 @@ except GeoLedgerError as err:
 
 **Go 示例**：
 ```go
+// appCtx 是仍有效的应用生命周期 context，不从可能超时的 ctx 派生。
 receipt, err := draft.Publish(ctx, "新增示例监测点")
 if err != nil {
     var geoErr *geoledger.Error
     if errors.As(err, &geoErr) && geoErr.Uncertain {
-        // 使用原工作区句柄与相同说明重放，自动复用原 request_id 确认结果
-        receipt, err = draft.Publish(ctx, "新增示例监测点")
+        // 为确认请求设置新的期限，继续使用原句柄与相同说明。
+        retryCtx, cancel := context.WithTimeout(appCtx, 30*time.Second)
+        receipt, err = draft.Publish(retryCtx, "新增示例监测点")
+        cancel()
     }
     if err != nil {
         return fmt.Errorf("发布确认失败: %w", err)
@@ -90,8 +93,8 @@ if err != nil {
 如果还要覆盖首次请求在途时进程突然退出的情况，应用需要在发送前自行构造完整的 `Publication` 意图并可靠持久化，再调用 `client.publish(intent)`；在记录预期工作区版本和发送请求之间，避免其他操作修改该工作区。仅在捕获错误后保存句柄意图无法覆盖进程在收到错误前退出的情况。
 
 当新进程启动后，直接通过 `client.publish(intent)` 提交还原后的意图：
-- **若原事务当时已提交**：服务端直接从 `gl_publication_receipts` 表中查出原回执并返回（即使期间该项目已被归档，或发布者角色已被降级为 `viewer`，只要当前仍为项目有效成员且工作区归属未变，已提交的回执依然允许重放读取）。
-- **若原事务当时未提交（已回滚）**：服务端会使用该意图正常执行发布事务并返回新回执。
+- **若原事务当时已提交**：服务端从 `gl_idempotency` 表中查出原回执并返回。即使项目已归档或发布者角色已降为 `viewer`，只要回执和工作区仍存在、调用者仍是有效成员且工作区归属未变，仍允许重放读取。
+- **若原事务当时未提交（已回滚）**：服务端会使用原意图重新尝试发布，并重新检查权限、工作区版本和合并条件；若这些条件不再满足，可能返回明确错误而不是回执。
 
 ## 步骤 4：核对最终结果与特殊情况处理
 
