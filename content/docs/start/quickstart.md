@@ -1,16 +1,18 @@
 ---
-title: "快速开始：启动测试环境"
+title: "快速开始：启动本地测试环境"
 linkTitle: "快速开始"
-description: "从固定源码构建统一容器，检查就绪状态并完成首次登录。"
+description: "通过 Docker Compose 从固定源码启动包含服务端、CLI 与 Web 控制台的本地环境，并完成首次登录。"
 weight: 20
 lastmod: 2026-10-29
 ---
 
-完成后，你将得到可登录的控制台和通过就绪检查的业务服务。接下来用[第一次发布]({{< relref "/docs/start/first-publication/" >}})验证保存、发布与读取。
+在本篇教程中，你将使用 Docker Compose 在本地构建并启动一套完整的 GeoLedger 服务（包含 Rust 服务端、SpatiaLite 运行时、命令行工具 `gl` 与 Web 控制台），验证服务就绪状态，并完成管理员首次登录。
 
-## 前置条件
+完成本教程后，你可以直接进入 **[完成第一次发布]({{< relref "/docs/start/first-publication/" >}})** 体验空间要素的编辑与版本发布。
 
-准备 Git、Docker Compose 和 OpenSSL，在一个独立测试目录操作。先确认命令可用：
+## 环境准备
+
+开始前，请确认本机已安装 **Git**、**Docker Compose** 与 **OpenSSL**。在终端运行以下命令检查工具版本：
 
 ```sh
 git --version
@@ -18,9 +20,11 @@ docker compose version
 openssl version
 ```
 
-使用新的 Docker 数据卷。已有实例或旧格式数据库的处理方式见[版本兼容性]({{< relref "/docs/reference/compatibility/" >}})。以下命令会构建容器并创建测试数据目录。
+> **提示**：建议在全新的独立目录中执行本教程。如果你之前运行过旧版本的 GeoLedger（存储格式低于 `19`），请使用全新的 Docker 数据卷，详细说明可参考[版本与兼容性]({{< relref "/docs/reference/compatibility/" >}})。
 
-## 1. 获取文档对应的源码
+## 步骤 1：获取源码并检出文档基线
+
+克隆 GeoLedger 仓库，并切换到与当前文档完全对应的源码提交：
 
 ```sh
 git clone https://github.com/mapseekai/geoledger.git
@@ -28,54 +32,72 @@ cd geoledger
 git checkout 5bf353c88cb017c8c00035fb86667dd2d7497b43
 ```
 
-该提交是本站的实现依据，包含 alpha.7 标签之后的主分支变更。需要复现发布包时，使用[兼容性参考]({{< relref "/docs/reference/compatibility/" >}})中的发布基线，不混用两套源码。
+固定该提交可以确保你本地运行的服务行为、API 契约与文档中的所有示例完全一致。
 
-## 2. 启动容器
+## 步骤 2：生成会话密钥并启动容器
+
+Web 控制台需要一个至少 32 字符的随机密钥（`GL_WEB_SESSION_SECRET`）来加密浏览器会话 Cookie。生成该密钥并在后台启动容器：
 
 ```sh
 export GL_WEB_SESSION_SECRET="$(openssl rand -base64 48)"
 docker compose up --build -d
 ```
 
-将会话密钥保存在私有配置中，以便重启时复用。首次构建会下载依赖并编译；不要在构建结束前判断服务失败。
+首次执行 `--build` 时，Docker 会下载基础镜像并编译 Rust 服务端与前端控制台，通常需要几分钟时间。如果后续需要重启容器并保持已有登录会话有效，请继续沿用同一个 `GL_WEB_SESSION_SECRET`。
 
-## 3. 检查服务就绪
+## 步骤 3：验证服务就绪状态
+
+容器启动后，使用 `curl` 请求服务端的就绪探针接口 `/ready`：
 
 ```sh
 curl --fail http://127.0.0.1:7881/ready
 ```
 
-预期响应为 `{"ok":true}`。`/health` 用于检查进程存活，`/ready` 还检查接单状态与存储。失败时先执行 `docker compose logs geoledger`，按[故障诊断]({{< relref "/docs/operations/troubleshooting/" >}})区分启动、数据库与容量问题。
+当服务完成数据库初始化并准备好接收请求时，会返回如下 JSON 响应：
 
-| 入口 | 默认地址 | 使用者 |
+```json
+{"ok":true}
+```
+
+此时本地环境的三个服务端点均已就绪：
+
+| 服务端点 | 默认本地地址 | 用途说明 |
 |---|---|---|
-| 控制台 | `http://localhost:3000` | 浏览器 |
-| HTTP API | `http://127.0.0.1:7881` | HTTP 客户端与控制台 BFF |
-| gRPC | `http://127.0.0.1:7882` | CLI 与四语言 SDK |
+| **Web 控制台** | `http://localhost:3000` | 浏览器可视化管理界面、地图工作台与冲突审阅 |
+| **HTTP 业务 API** | `http://127.0.0.1:7881` | 公开 HTTP JSON 接口（`/api/v1/*`）与健康检查探针（`/health`、`/ready`） |
+| **gRPC 服务** | `http://127.0.0.1:7882` | 供命令行工具 `gl` 与 Rust / Go / TS / Python SDK 连接 |
 
-这些是本机测试地址。对外部署的监听、TLS 和网关配置见[部署与运行]({{< relref "/docs/operations/deployment/" >}})。
+> **排查提示**：如果 `/ready` 暂未返回成功，可执行 `docker compose logs -f geoledger` 查看构建与启动进度，或参考[故障诊断]({{< relref "/docs/operations/troubleshooting/" >}})排查端口占用与配置问题。
 
-## 4. 完成首次登录
+## 步骤 4：获取初始凭据并完成首次登录
 
-未设置初始化密码时，服务端生成随机密码并保存为私有文件。在自己的终端读取：
+当未通过环境变量显式指定 `GL_ADMIN_PASSWORD` 时，GeoLedger 会在首次启动时自动生成高强度随机管理员密码，并以只读私有权限（`0600`）保存在容器数据卷的 `/data/initial-admin-<id>.json` 文件中。
+
+在终端运行以下命令读取初始管理员凭据：
 
 ```sh
 docker compose exec geoledger sh -c 'cat /data/initial-admin-*.json'
 ```
 
-打开控制台，用文件中的用户名与密码登录，再按提示修改初始密码。不要将文件内容放入工单、日志附件或截图。程序接入所需的个人 API Key 在登录后单独创建。
+接下来完成首次登录：
 
-## 结果验证与停止
+1. 在浏览器中打开 `http://localhost:3000`。
+2. 输入上述 JSON 文件中的用户名（默认为 `admin`）和随机初始密码进行登录。
+3. 按照页面引导**修改初始密码**。密码修改完成后，即可正式进入 GeoLedger 控制台。
 
-确认 `/ready` 成功、首次改密完成，并能进入控制台。继续[创建工作区并发布一个要素]({{< relref "/docs/start/first-publication/" >}})，完成业务链路验证。
+> **安全提醒**：初始凭据文件仅用于首次引导登录，请勿将其内容粘贴到公开工单、聊天记录或截图中。后续使用 CLI 或 SDK 时，请在控制台的 **API Key** 页面单独创建个人访问密钥。
 
-结束测试时运行：
+## 停止与清理环境
+
+完成后续教程练习后，若需暂停容器但保留已创建的数据卷，可运行：
 
 ```sh
 docker compose stop
 ```
 
-该命令停止容器并保留数据卷。重新启动时使用原会话密钥；重建旧版本环境时使用与其匹配的数据库和程序。
+## 下一步
+
+服务已经就绪！接下来请继续阅读 **[完成第一次发布]({{< relref "/docs/start/first-publication/" >}})**，亲手创建项目、保存空间要素并体验版本发布与回溯。
 
 ## 实现依据
 

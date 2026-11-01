@@ -1,50 +1,59 @@
 ---
-title: "事务与发布一致性"
-description: "解释单一事务所有者、并发协调、幂等回执和响应丢失。"
+title: "事务边界与发布一致性保证"
+linkTitle: "事务与发布一致性"
+description: "深入解析 GeoLedger 的单一事务所有者模式、项目与工作区并发锁协调、连接池安全回收以及幂等发布回执机制。"
 weight: 50
 lastmod: 2026-10-29
 ---
 
-一次发布的正确性不只取决于“正式表写入成功”。当前要素、旧正文、提交明细、字段历史、HEAD、工作区状态、幂等回执和审计必须具有相同的提交结果。
+在版本化空间数据服务中，一次“发布（Publish）”操作远不止是向数据表插入几行记录——它需要同时更新多张数据集正式表（或外部 PostGIS 业务表）、归档被覆盖的历史旧正文、执行版本化字段 DDL、记录提交明细与字段历史、推进项目 `HEAD`、更新工作区状态、写入幂等发布回执并追加审计日志。
 
-## 单一事务所有者
+如果这些步骤分散在多个独立事务中执行，一旦中途发生进程崩溃或约束冲突，数据库就会陷入“正式表已更新但历史记录缺失”或“审计已写入但发布实际失败”的半成品状态。GeoLedger 通过**单一事务所有者模式**与**事务内不可变回执**彻底消除了此类不一致风险。
 
-Application 开启事务，执行授权与校验、调用合并、完成响应编码和预算检查，再唯一一次提交。存储能力可以拆分为多个 trait，但它们共享连接、快照、锁、期限和暂存状态。
+## 1. 单一事务所有者模式（Single Transaction Owner）
 
-领域函数借用所需能力，不能提前提交，也不能另开连接把审计或回执写入另一个事务。事务未提交即被丢弃时，后端必须回滚全部写入。
+在 `geoledger-engine` 中，每一次业务 API 调用都严格对应一个 `RepositoryTransaction` 生命周期：
 
-## 并发发布如何协调
+1. **统一开启与预算绑定**：`Application` 从存储后端获取事务对象，并将当前请求的截止时间（Deadline）与响应编码字节预算（`ResponseBudget`）绑定到该事务。
+2. **按能力可变借用（`t.as_mut()`）**：执行权限校验、草稿保存、三方合并或历史写入的子模块仅借用事务对象的特定能力接口（如 `WorkspaceRepository` 或 `PublicationRepository`）。这些子接口**不包含 `commit` 方法**，因此任何内部函数都无法私自提前提交事务，也不会另起炉灶开启第二个数据库连接。
+3. **先完成编码校验，再执行唯一提交**：在事务即将结束前，`Application` 会先完成响应结构的组装与字节预算检查；只有当所有业务规则、数据库约束（包括 PostGIS 纳管表的延迟约束与触发器核对）和内存预算全部通过后，事务所有者才会调用消耗所有权的 `commit(self: Box<Self>)`。
+4. **Drop 即完整回滚**：如果在任意步骤返回错误、超时取消或发生异常退出，事务对象在被丢弃（Drop）时会立即回滚全部已暂存的修改、DDL 与锁状态。
 
-同项目发布在项目 HEAD 锁上协调，获得锁后读取最新 HEAD。工作区写入在自身状态锁上协调，并检查预期编辑版本。这样既保护共享版本推进，也避免同一草稿被多个请求无意覆盖。
+## 2. 并发协调：项目锁、工作区锁与连接池安全
 
-锁与请求都受总期限约束。PostGIS 连接发生取消或故障时，确认回滚前仍可能占用连接池名额；不能把“调用已超时”简单等同于“数据库已停止工作”。
+当多个用户或自动化脚本并发操作时，GeoLedger 在细粒度锁上协调读写冲突：
 
-## 响应丢失的情况
+- **同工作区写入串行化**：针对同一个工作区的 `save`、`resolve`、`rebase`、`discard` 与 `publish` 会获取该工作区的写锁（`workspace_state(write=true)`），并核对 `expected_workspace_version`，确保同一份草稿不会被并发请求交错覆盖。
+- **同项目发布串行化**：针对同一项目的并发 `publish`（以及构建冲突缓存的 `conflicts`）会获取项目级 `HEAD` 锁（`project_head(lock=true)`），并在获锁后读取最新的 `HEAD` 修订号执行三方合并检验；不同项目之间的发布则完全并行、互不阻塞。
+- **独立审计顺序锁**：在 PostgreSQL / PostGIS 下，追加项目审计日志（`append_audit`）在分配自增序号前会获取项目级事务咨询锁（Advisory Lock），保证审计事件的 ID 顺序与事务实际提交顺序严格一致，从而让基于 `id > after` 的审计游标分页永不遗漏并发提交的事件。
+- **PostGIS 连接池的安全回收**：当某个 PostgreSQL 请求因超时或取消而中断时，如果后端会话已确认完成 `ROLLBACK` 清理，连接池会直接复用该健康连接；若回滚状态不确定或连接发生协议错误，连接池会安全淘汰该连接并在确认原后端会话消失前保留池名额，防止失控的慢查询耗尽数据库资源。
+
+## 3. 网络断连与响应丢失下的幂等发布恢复
+
+最棘手的分布式边界情况发生在 **`COMMIT` 成功之后、客户端收到响应之前**：此时数据库已经完成了版本发布，但因网络闪断或网关超时，客户端只收到了连接断开或 `504` 错误。
+
+GeoLedger 通过将**发布回执**（Publication Receipt）纳入同一个发布事务来解决这一问题：
 
 ```mermaid
 sequenceDiagram
-  participant C as 客户端
-  participant A as Application
-  participant DB as 数据库事务
-  C->>A: Publish(原请求 ID + 工作区版本 + 说明)
-  A->>DB: 合并并写入正式数据、历史和回执
-  DB-->>A: COMMIT 成功
-  Note over C,A: 响应丢失，客户端结果不确定
-  C->>A: 使用同一 ID 与原始内容重试
-  A->>DB: 查询不可变发布回执
-  DB-->>A: 已提交的原始结果
-  A-->>C: 返回相同修订，不重复发布
+  participant C as 客户端 (SDK / 控制台 / CLI)
+  participant A as Application 引擎
+  participant DB as 数据库事务 (SQLite / PostGIS)
+  C->>A: 1. Publish (request_id + expected_workspace_version + message)
+  A->>DB: 2. 三方合并并写入正式表、历史、HEAD、审计与不可变回执
+  DB-->>A: 3. COMMIT 事务提交成功
+  Note over C,A: 网络闪断或超时，响应丢失（客户端标记为 uncertain）
+  C->>A: 4. 沿用同一 request_id 与原始负载重试 Publish
+  A->>DB: 5. 按 (project, subject, request_id) 查询发布回执表
+  DB-->>A: 6. 命中已提交的原始请求负载与发布结果
+  A-->>C: 7. 幂等返回首次生成的同一 Revision 回执，不重复发布
 ```
 
-回执键为 `(project, subject, request_id)`。相同 ID 配不同请求内容会被拒绝，避免一次身份对应两种发布意图。
+### 幂等回执的安全校验规则
 
-## 客户端需要保存什么
-
-客户端保存完整发布意图，并将结果未知与明确拒绝分开处理。句柄重试、跨进程持久化、身份恢复和结果核对统一见[确认与恢复发布]({{< relref "/docs/guides/publication-recovery/" >}})。
-
-## 成本与测量边界
-
-发布 RPC 耗时与完整“保存多批、审阅和发布”流程耗时不同。任何性能报告都应注明版本、后端、数据量、索引、并发和测量范围；本页描述一致性机制，不给出未经当前环境验证的性能承诺。
+- **复合唯一键**：回执表（`gl_publication_receipts`）以 `(project, subject, request_id)` 为主键，记录首次提交时的序列化请求负载（`payload`）与返回结果（`result`）。
+- **防篡改负载比对**：当客户端使用相同的 `request_id` 重试时，服务端不仅检查该 ID 是否存在，还会严格比对本次请求的 `(workspace, expected_workspace_version, message)` 是否与已记录的 `payload` 完全一致。若完全一致则直接返回原 `result`；若不一致则立即返回 `409 Conflict (request_id payload mismatch)`，防止调用方误将旧 UUID 复用给新的发布任务。
+- **客户端实操指南**：关于如何在四语言 SDK、CLI 与控制台中持久化并重放发布意图，请参阅操作手册中的 **[确认与恢复中断的发布]({{< relref "/docs/guides/publication-recovery/" >}})**。
 
 ## 实现依据
 

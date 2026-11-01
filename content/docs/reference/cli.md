@@ -1,67 +1,104 @@
 ---
-title: "CLI 参考"
+title: "CLI 命令行参考（gl）"
 linkTitle: "CLI 接入"
-description: "查阅 gl 的连接选项、命令、JSON 输入和退出行为。"
+description: "查阅 GeoLedger 远程命令行工具 gl 的构建方式、全局选项、凭据文件安全校验、内置子命令与通用 JSON 调用规范。"
 weight: 25
 lastmod: 2026-10-29
 ---
 
-`gl` 是 gRPC 远程客户端。它连接业务服务，使用用户身份执行操作；数据库备份和导入等本地管理命令属于 `geoledger-server`，见[备份指南]({{< relref "/docs/operations/backup/" >}})。
+`gl` 是 GeoLedger 官方提供的远程命令行客户端。它底层基于 Rust SDK（`geoledger-client`）通过 gRPC 连接 `geoledger-server`，既提供了查看服务信息、项目列表、成员与历史的快捷命令，也支持通过 `gl call <operation>` 直接调用全部 30 个业务操作。
 
-## 构建与身份
+> **职责区分**：`gl` 是面向日常业务与自动化脚本的**远程 gRPC 客户端**；而数据库物理备份（`backup` / `restore`）与逻辑导入导出（`export` / `import` / `verify`）属于服务端本地管理命令，请通过 `geoledger-server` 执行（详见 **[备份、导出与恢复]({{< relref "/docs/operations/backup/" >}})**）。
 
-在文档对应的源码根目录执行 `cargo build --locked --bins`，生成 `target/debug/gl`。发布构建使用 `cargo build --release --locked --bins`；Windows 程序带 `.exe` 后缀。
+## 1. 构建二进制与配置 API Key
 
-API Key 从 `GL_API_KEY` 或私有纯文本文件中选择一种来源。两者同时设置或都未提供时，CLI 拒绝执行。Unix 文件要求为私有普通文件，不能是符号链接。
+### 构建 `gl`
 
-## 全局选项
+在 GeoLedger 源码仓库根目录下运行 Cargo 构建命令：
 
-| 选项 | 环境变量 | 默认值 | 用途 |
+```sh
+# 开发调试构建（生成 target/debug/gl）
+cargo build --locked --bins
+
+# 生产优化构建（生成 target/release/gl；Windows 下带 .exe 后缀）
+cargo build --release --locked --bins
+```
+
+如果使用 Docker Compose 统一容器，容器内已预装 `gl`，可通过 `docker compose exec geoledger gl ...` 直接调用。
+
+### 凭据来源与严格互斥规则
+
+为了避免不慎混用不同环境的密钥，`gl` 要求从以下两种方式中**二选一**（严格互斥）提供个人 API Key：
+
+1. **私有凭据文件（推荐）**：通过 `--api-key-file <PATH>` 或环境变量 `GL_API_KEY_FILE` 指定一个仅包含单个 API Key 的纯文本文件（最大不超过 1,024 字节）。
+   - **Unix 安全校验**：`gl` 会强制检查该文件的元数据——它必须是**普通文件（非符号链接）**，且权限必须为**仅所有者可读写（如 `0600` 或 `0400`，即 `mode & 0o077 == 0`）**。若权限过宽（如 `0644`），`gl` 将拒绝执行并提示修正权限。
+2. **环境变量**：设置 `GL_API_KEY`（此时不可同时设置 `--api-key-file` 或 `GL_API_KEY_FILE`）。
+
+如果同时提供了上述两种来源，或者两者均未提供，`gl` 会立即报错：`supply GL_API_KEY or --api-key-file exclusively`。
+
+## 2. 全局选项与环境变量
+
+| 命令行选项 | 对应环境变量 | 默认值 | 说明 |
 |---|---|---|---|
-| `--endpoint` | `GL_ENDPOINT` | `http://127.0.0.1:7882` | gRPC 服务地址 |
-| `--api-key-file` | `GL_API_KEY_FILE` | 未设置 | 私有 API Key 文件 |
-| 无命令行 Key 参数 | `GL_API_KEY` | 未设置 | 与凭据文件互斥的 Key 来源 |
-| `--ca-file` | `GL_CA_FILE` | 未设置 | 私有 CA PEM 文件 |
-| `--allow-insecure` | `GL_ALLOW_INSECURE_TRANSPORT` | `false` | 显式允许非回环 HTTP |
-| `--help` | 无 | 无 | 输出命令帮助 |
-| `--version` | 无 | 无 | 输出客户端版本 |
+| `--endpoint <URL>` | `GL_ENDPOINT` | `http://127.0.0.1:7882` | 目标 `geoledger-server` 的 gRPC 监听地址 |
+| `--api-key-file <PATH>` | `GL_API_KEY_FILE` | 未设置 | 私有纯文本 API Key 文件路径（与 `GL_API_KEY` 互斥） |
+| *(仅环境变量)* | `GL_API_KEY` | 未设置 | 直接从环境变量读取 API Key（不提供命令行明文参数以防泄露到 `ps` 进程列表） |
+| `--ca-file <PATH>` | `GL_CA_FILE` | 未设置 | 连接私有 CA 签发的 `https://` 端点时附加的 PEM 根证书文件 |
+| `--allow-insecure` | `GL_ALLOW_INSECURE_TRANSPORT` | `false` | 显式允许在可信隔离内网对非回环主机使用明文 `http://` |
+| `--help` / `-h` | — | — | 显示命令行帮助信息 |
+| `--version` / `-V` | — | — | 显示 `gl` 客户端版本号 |
 
-## 命令目录
+## 3. 子命令目录
 
-| 命令 | 参数 | 输出与范围 |
+| 子命令 | 参数与选项 | 等价业务操作与默认行为 |
 |---|---|---|
-| `info` | 无 | 版本、后端和请求规格 |
-| `projects` | 无 | 一次请求的可见项目列表，limit 为 100 |
-| `members <project>` | 项目 UUID | 一次请求的成员列表，limit 为 1000 |
-| `history <project>` | `--after`，默认 `0` | 一页提交记录，limit 为 100 |
-| `call <operation>` | `--file`，默认 `-` | 执行指定业务操作，JSON 形状见 HTTP 业务参考 |
+| `gl info` | 无 | 调用 `info`，输出服务端版本、存储后端、存储格式（`19`）、请求预算与 `platform_admin` 标志 |
+| `gl projects` | 无 | 调用 `list_projects`（单次请求，`limit = 100`），输出可见项目列表 |
+| `gl members <PROJECT>` | `<PROJECT>`：项目 UUID | 调用 `list_members`（单次请求，`limit = 1000`），输出项目的有效成员列表 |
+| `gl history <PROJECT>` | `<PROJECT>`：项目 UUID<br>`--after <REV>`：起始游标（默认 `0`） | 调用 `history`（单次请求，`limit = 100`），输出一页按修订号升序排列的提交记录与 `next_after` |
+| `gl call <OPERATION>` | `<OPERATION>`：`snake_case` 操作名<br>`--file <PATH>`：JSON 输入路径（默认 `-` 表示标准输入 `stdin`） | 执行任意公开业务操作（请求与响应 JSON 结构与 **[HTTP 业务 API]({{< relref "/docs/reference/http/" >}})** 完全一致） |
 
-快捷列表命令不自动遍历所有页。需要完整扫描时，通过 `call` 显式传入分页参数，并遵守[游标契约]({{< relref "/docs/reference/pagination/" >}})。
+> **分页提示**：`projects`、`members` 与 `history` 快捷子命令仅发起单次请求，不会在终端自动循环拉取所有后续分页。当数据量超过单页上限时，请使用 `gl call` 显式传入 `after` 与 `limit` 参数（详见 **[分页与一致性参考]({{< relref "/docs/reference/pagination/" >}})**）。
 
-## 文件与标准输入
+## 4. 常用命令示例
 
-以下示例使用已经保存的测试 Key 文件，不包含密钥明文：
+### 查询服务状态与项目列表
 
 ```sh
 chmod 600 ./api-key
 ./target/debug/gl --api-key-file ./api-key info
 ./target/debug/gl --api-key-file ./api-key projects
-./target/debug/gl --api-key-file ./api-key call list_datasets --file request.json
 ```
 
-`request.json` 的示意内容如下，先将占位值替换为真实测试项目 UUID：
+### 使用 `gl call` 读取文件或标准输入执行业务操作
+
+你可以将请求参数保存为 JSON 文件（如 `request.json`）：
 
 ```json
-{"project": "<project-uuid>", "limit": 100}
+{
+  "project": "0192d4a0-0000-7000-8000-000000000001",
+  "limit": 100
+}
 ```
 
-`--file -` 从标准输入读取 JSON。凭据不得放在 URL 查询参数中。
+然后通过 `--file` 传入文件，或直接通过管道（默认 `--file -`）传入标准输入：
 
-## 输出与失败
+```sh
+# 方式 A：从 JSON 文件读取请求体列出数据集
+./target/debug/gl --api-key-file ./api-key call list_datasets --file request.json
 
-成功结果以格式化 JSON 写入标准输出。失败写入标准错误并以状态码 `1` 退出；业务错误保留 SDK 错误内容。
+# 方式 B：通过管道从标准输入创建项目
+printf '%s\n' '{"name":"城市管网巡检"}' \
+  | ./target/debug/gl --api-key-file ./api-key call create_project
+```
 
-`call publish` 的结果未知时，保留输入文件、原请求 ID 与原始内容，按[发布恢复指南]({{< relref "/docs/guides/publication-recovery/" >}})确认结果。更换 UUID 会产生新的发布意图。
+## 5. 标准输出、退出码与错误处理
+
+- **成功执行（退出码 `0`）**：`gl` 将结果序列化为带缩进的格式化 JSON（Pretty-printed JSON）写入**标准输出（`stdout`）**，可直接配合 `jq` 等工具在脚本中解析。
+- **执行失败（退出码 `1`）**：
+  - 若为服务端返回的业务错误（`geoledger_client::Error`），`gl` 会将包含 `code`、`message`、`request_id` 与 `uncertain` 的单行 JSON 写入**标准错误（`stderr`）**。
+  - 若为本地参数或文件权限错误，则向 `stderr` 输出 `gl: <错误原因>`。
+- **发布超时后的安全恢复**：当通过 `gl call publish --file publish.json` 发布工作区遇到超时或网络中断时，**请勿修改 `publish.json` 中的 `request_id` 或 `message`**，直接再次运行完全相同的命令即可安全确认原发布回执（详见 **[发布结果恢复]({{< relref "/docs/guides/publication-recovery/" >}})**）。
 
 ## 实现依据
 
