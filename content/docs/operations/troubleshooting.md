@@ -1,15 +1,15 @@
 ---
 title: "故障诊断与常见问题排查"
 linkTitle: "故障诊断"
-description: "按容器启动失败、控制台登录报错、401/404 权限问题、409 版本冲突、request_id 幂等错误及 413/429/504 资源限制快速定位并解决问题。"
+description: "按容器启动失败、控制台登录报错、401/404 权限问题、409 版本冲突、request_id 幂等错误及 408/413/429/504 资源限制快速定位并解决问题。"
 weight: 40
 lastmod: 2026-11-01
 ---
 
-当你在部署、登录或调用 API 时遇到异常，建议先记录以下四个关键信息，再对照下文对应的故障分支进行排查：
+当你在部署、登录或调用 API 时遇到异常，建议先记录以下信息，再对照下文对应的故障分支进行排查：
 
-1. **响应中的 `request_id` 与业务错误码 `code`**：服务端会在每个错误响应体和 `x-request-id` 响应头中返回唯一请求 ID，可用它在服务端 JSON 日志中精准检索上下文。
-2. **服务端版本与存储后端**：通过 `GET /health` 或启动日志确认当前运行版本与 `GL_STORAGE`（`sqlite` 或 `postgis`）。
+1. **请求 ID 与错误码**：记录 HTTP 响应头 `x-request-id`，以及错误正文中存在的 `error.request_id` 和 `error.code`。业务 API 通常会将正文中的请求 ID 与响应头关联；`/ready` 等探针错误的正文 ID 不保证与响应头一致，应同时记录两者及发生时间。服务端也可能回传调用方提供的有效请求 ID，不应假设它在所有请求中唯一。
+2. **服务端版本与存储后端**：通过 `GET /health` 的 `version` 确认版本；通过已认证的 `gl info` 或 SDK `info` 响应中的 `backend` 确认实际后端，并核对 `GL_STORAGE` 配置（`sqlite` 或 `postgis`）。
 3. **日志脱敏原则**：向团队或社区提交日志片段前，请务必隐去 `GL_API_KEY`、`GL_WEB_SESSION_SECRET` 与数据库连接口令。
 
 ---
@@ -75,7 +75,7 @@ lastmod: 2026-11-01
 
 | 409 细分场景 | 原因说明 | 正确处理步骤 |
 |---|---|---|
-| **工作区版本不匹配（`workspace version mismatch`）** | 本地持有的 `expected_workspace_version` 落后于服务端工作区的最新 `version` | 调用 `get_workspace` / `refresh` 刷新工作区状态，检查是否有其他终端已写入草稿，确认后再提交 |
+| **工作区版本过期或已关闭（`stale version or workspace not open`）** | 本地持有的 `expected_workspace_version` 落后于服务端工作区的最新 `version`，或者工作区已不再开放 | 调用 `get_workspace` / `refresh` 检查当前状态；若仍开放，核对其他终端的草稿变更后再提交；若已关闭，创建新工作区 |
 | **存在合并冲突或 `stale_resolution`** | 共享 `HEAD` 已推进且存在同一字段/几何冲突，或先前的冲突裁决因上下文变化而失效 | 调用 `conflicts` 分页读取最新的 `base` / `current` / `draft`，提交完整裁决结果（`resolve`）并执行 `rebase`（切勿仅修改版本号强行覆盖） |
 | **业务源表发生漂移** | 返回 `business table changed outside GeoLedger; reconcile the source before publishing`。可能是源表结构或保护触发器发生变化，也可能检测到绕过 GeoLedger 的写入 | 暂停受影响的写入，保留完整数据库备份与变更证据，由 DBA 核对源表和触发器；在隔离环境验证[备份恢复]({{< relref "/docs/operations/backup/" >}})方案，并评估备份之后的数据。不要直接清空 `gl_source_changes` 或删除数据集来消除报错：删除数据集会清理相关版本历史，参见 [PostGIS 表纳管]({{< relref "/docs/guides/postgis/" >}}) |
 | **字段变更基线失效（Schema 意图冲突）** | 工作区包含 `schema_edits`，但期间项目 `HEAD` 已被其他提交推进 | 先传空数组 `schema_edits: []` 撤销旧字段意图，执行 `rebase` 并读取最新 `schema` 后重新声明字段变更（见[字段增删指南]({{< relref "/docs/guides/schema/" >}})） |
@@ -94,15 +94,16 @@ lastmod: 2026-11-01
 
 ---
 
-## 6. 请求返回 `413 Payload Too Large`、`429 Too Many Requests` 或 `504 Gateway Timeout`
+## 6. 请求返回 `408`、`413`、`429` 或 `504`
 
 ### 典型症状
-- 大批量保存、大范围查询或高并发压测时触发资源保护状态码。
+- 上传请求、大范围查询或高并发操作时遇到超时或资源保护状态码。
 
 ### 原因与调优方案
 - **`413 Payload Too Large`**：单次请求体或单页查询编码响应超出了字节预算（`GL_MAX_REQUEST_BYTES` / `GL_MAX_RESPONSE_BYTES`，默认各 64 MiB）。请减小单页查询的 `limit`（默认 100，最大 1,000）或分批保存的批次大小，复杂大切片几何也可适当调大服务端预算参数。
-- **`429 Too Many Requests`**：并发执行槽（`GL_MAX_CONCURRENCY`，默认 20）或并发收发内存池（默认各 256 MiB）已满，或触发了 IP / 身份速率限制。请根据响应头 `Retry-After: 1` 控制客户端并发度，避免无退避的死循环重试。
-- **`504 Gateway Timeout`（或 `deadline_exceeded`）**：单次操作耗时超过了 `GL_REQUEST_TIMEOUT_SECS`（默认 30 秒）或数据库语句/锁等待期限。
+- **`408 Request Timeout`（`request body timeout`）**：服务端在请求期限内未能读完 HTTP 请求体。检查上传连接和请求体大小，必要时分批发送；请求期限由 `GL_REQUEST_TIMEOUT_SECS` 控制。
+- **`429 Too Many Requests`**：并发执行槽（`GL_MAX_CONCURRENCY`，默认 20）或并发收发内存池（默认各 256 MiB）已满，触发 IP / 身份速率限制，或数据库锁暂不可用。请检查锁竞争，根据 HTTP 响应头 `Retry-After: 1` 控制客户端并发度，避免无退避的死循环重试。
+- **`504 Gateway Timeout`（或 `deadline_exceeded`）**：操作或数据库语句超过了期限；`GL_REQUEST_TIMEOUT_SECS` 默认 30 秒。锁等待可能返回 `429`，若请求或语句期限先到也可能返回 `504`。
   - 若发生在查询阶段：检查 PostGIS 纳管大表是否已创建 `GiST` 空间索引，并缩小查询 `bbox` 或 `limit`。
   - **若发生在 `publish` 阶段**：数据库事务可能在超时瞬间恰好提交成功！**请务必按 [发布结果恢复]({{< relref "/docs/guides/publication-recovery/" >}}) 流程使用原 `request_id` 确认结果**。
 
@@ -120,7 +121,10 @@ lastmod: 2026-11-01
 ## 实现依据
 
 - [crates/server/src/main.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/server/src/main.rs)
+- [crates/server/src/http.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/server/src/http.rs) · [crates/engine/src/errors.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/errors.rs)
+- [crates/server/src/lib.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/server/src/lib.rs) · [crates/engine/src/session/postgres.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/session/postgres.rs)
 - [crates/spatialite/src/lib.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/spatialite/src/lib.rs) · [crates/engine/src/session.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/session.rs)
+- [crates/engine/src/lib.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/lib.rs)
 - [crates/engine/src/session/tables.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/session/tables.rs)
 - [crates/engine/src/workspace.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/workspace.rs)
 - [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/publication.rs)
