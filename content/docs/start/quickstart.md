@@ -29,7 +29,7 @@ openssl version
 ```sh
 git clone https://github.com/mapseekai/geoledger.git
 cd geoledger
-git checkout 5bf353c88cb017c8c00035fb86667dd2d7497b43
+git checkout 9d31fb5f1e3547ba940518564105cb4a13ea42df
 ```
 
 固定该提交可以确保你本地运行的服务行为、API 契约与文档中的所有示例完全一致。
@@ -108,7 +108,7 @@ docker compose stop
 
 ## 实现依据
 
-- [compose.yaml](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/compose.yaml)
-- [Dockerfile](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/Dockerfile)
-- [crates/server/src/main.rs](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/crates/server/src/main.rs)
-- [docs/security.md](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/docs/security.md)
+- [compose.yaml](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/compose.yaml)
+- [Dockerfile](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/Dockerfile)
+- [crates/server/src/main.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/server/src/main.rs)
+- [docs/security.md](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/docs/security.md)

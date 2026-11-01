@@ -174,16 +174,16 @@ try {
 
 仓库内置了覆盖四个语言的完整端到端可执行示例，可直接在源码中参考：
 
-- **Rust**：[sdk/rust/examples/smoke.rs](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/rust/examples/smoke.rs)
-- **Go**：[sdk/go/cmd/smoke/main.go](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/go/cmd/smoke/main.go)
-- **TypeScript**：[sdk/ts/test/smoke.cjs](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/ts/test/smoke.cjs)
-- **Python**：[sdk/python/tests/smoke.py](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/python/tests/smoke.py)
+- **Rust**：[sdk/rust/examples/smoke.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/rust/examples/smoke.rs)
+- **Go**：[sdk/go/cmd/smoke/main.go](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/go/cmd/smoke/main.go)
+- **TypeScript**：[sdk/ts/test/smoke.cjs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/ts/test/smoke.cjs)
+- **Python**：[sdk/python/tests/smoke.py](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/python/tests/smoke.py)
 
 ## 实现依据
 
-- [sdk/rust/src/lib.rs](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/rust/src/lib.rs)
-- [sdk/go/client.go](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/go/client.go)
-- [sdk/go/go.mod](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/go/go.mod)
-- [sdk/ts/src/index.ts](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/ts/src/index.ts)
-- [sdk/python/geoledger/__init__.py](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/python/geoledger/__init__.py)
-- [sdk/python/pyproject.toml](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/sdk/python/pyproject.toml)
+- [sdk/rust/src/lib.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/rust/src/lib.rs)
+- [sdk/go/client.go](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/go/client.go)
+- [sdk/go/go.mod](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/go/go.mod)
+- [sdk/ts/src/index.ts](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/ts/src/index.ts)
+- [sdk/python/geoledger/__init__.py](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/python/geoledger/__init__.py)
+- [sdk/python/pyproject.toml](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/python/pyproject.toml)

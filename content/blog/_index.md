@@ -15,5 +15,5 @@ cascade:
 
 欢迎浏览 **GeoLedger 项目动态**。为了帮助你区分已发布的版本产物与主分支上的增量工程改进，我们将文章分为两类：
 
-- **版本发布（`Release` 标签）**：对应已打标发布的版本，包括 `v0.3.0-alpha.7`、`v0.3.0-alpha.6`、`v0.3.0-alpha.4` 等预发布版本，说明新增特性、破坏性变更（Breaking Changes）与存储格式升级要求。
+- **版本发布（`Release` 标签）**：对应已打标发布的版本，包括 `v0.3.0-alpha.7`、`v0.3.0-alpha.6`、`v0.3.0-alpha.4` 等已记录的预发布版本，说明新增特性、破坏性变更（Breaking Changes）与存储格式升级要求。
 - **主分支工程记录（`Main` 标签）**：记录指定发布标签之后、截至文章所注明源码基线的内部优化与依赖安全修复。后续发布情况以 [GitHub Releases](https://github.com/mapseekai/geoledger/releases) 为准。

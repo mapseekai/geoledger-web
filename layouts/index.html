@@ -1,7 +1,7 @@
 {{ define "main" }}
 <section class="gl-hero gl-container" aria-labelledby="hero-title">
   <div class="gl-hero-copy">
-    <a class="gl-release" href="{{ "blog/alpha-7/" | relURL }}"><span class="gl-status-dot"></span> v0.3.0-alpha.7 <span class="gl-release-divider">/</span> 独立数据表与版本化字段定义</a>
+    <a class="gl-release" href="{{ "docs/reference/compatibility/" | relURL }}"><span class="gl-status-dot"></span> {{ hugo.Data.project.version }} <span class="gl-release-divider">/</span> 文档基线 {{ substr hugo.Data.project.source_commit 0 7 }}</a>
     <p class="gl-eyebrow">SPATIAL DATA. VERSIONED.</p>
     <h1 id="hero-title">空间数据，<br><span>版本有据。</span></h1>
     <p class="gl-hero-lead">为持续演进的 GIS 数据提供像代码一样清晰的版本边界。<br>在独立工作区编辑空间要素，审阅要素级差异、通过三方合并解决冲突，并以单次数据库事务发布为可追溯的共享修订。</p>

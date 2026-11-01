@@ -56,7 +56,7 @@ lastmod: 2026-11-01
 - **在当前工作区视图下**：地图和属性表中立即出现了 `station-001`，工作区编辑版本推进为 `v1`。
 - **切换到“已发布的数据”视图时**：数据集仍然为空（项目 `HEAD` 仍为 `r0`）。这说明未发布的草稿对其他只读用户或线上查询完全隔离。
 
-> **界面提示**：在 `v0.3.0-alpha.7` 中，保存后数据来源选择器中的版本号可能暂时停留在旧值；请以选择器旁的版本标记为准。
+> **界面提示**：保存后，数据来源选择器及其旁边的版本标记都会显示当前工作区的最新草稿版本。
 
 ## 步骤 3：审阅差异并发布为修订 R1
 
@@ -122,6 +122,6 @@ lastmod: 2026-11-01
 
 ## 实现依据
 
-- [docs/console.md](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/docs/console.md)
-- [crates/engine/src/workspace.rs](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/crates/engine/src/workspace.rs)
-- [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/crates/engine/src/publication.rs)
+- [docs/console.md](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/docs/console.md)
+- [crates/engine/src/workspace.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/src/workspace.rs)
+- [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/src/publication.rs)

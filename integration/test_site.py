@@ -64,6 +64,16 @@ class SiteContracts(unittest.TestCase):
         quickstart = (ROOT / "content/docs/start/quickstart.md").read_text()
         self.assertIn(f"git checkout {commit}", quickstart)
 
+    def test_documentation_source_links_and_theme_version_match_baseline(self):
+        project = json.loads((ROOT / "data/project.json").read_text())
+        config = (ROOT / "hugo.yaml").read_text()
+        self.assertRegex(config, rf"(?m)^  version: {re.escape(project['version'])}$")
+        for path in (ROOT / "content/docs").rglob("*.md"):
+            commits = re.findall(r"https://github\.com/mapseekai/geoledger/blob/([^/\s)]+)/", path.read_text())
+            for commit in commits:
+                with self.subTest(page=str(path.relative_to(ROOT))):
+                    self.assertEqual(commit, project["source_commit"])
+
     def test_document_examples_have_valid_syntax(self):
         for path in (ROOT / "content/docs").rglob("*.md"):
             blocks = re.findall(r"^```(json|python|sh)\n(.*?)^```", path.read_text(), re.M | re.S)

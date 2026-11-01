@@ -1,5 +1,7 @@
 # Verification record — 2026-10-29
 
+The 2026-10-29 results below are historical; the current baseline was checked separately in the 2026-11-01 entry at the end of this file.
+
 Baseline: GeoLedger `5bf353c88cb017c8c00035fb86667dd2d7497b43`, OINK `v1.4.0`, Hugo Extended `0.168.0`.
 
 ## Executed
@@ -44,3 +46,14 @@ Evidence and before/after screenshots are under the ignored `artifacts/docs-revi
 Hallmark's static audit was used diagnostically. Its Puppeteer renderer was excluded by the explicit ego-browser-only project policy; no clean Hallmark verdict is claimed for the unchanged homepage. Its uppercase decoration labels, simulated screenshot title bar, small auxiliary text and repeated decoration remain documented recommendations.
 
 GeoLedger startup, SDK network writes and database recovery were not executed during this revision. Operational pages explicitly mark source-checked procedures as awaiting isolated-environment validation. No GeoLedger source checkout, existing service, commit, push or public deployment was changed. The task preview uses loopback port 1327.
+
+## Pinned source revalidation, 2026-11-01
+
+- The documentation baseline is GeoLedger `9d31fb5f1e3547ba940518564105cb4a13ea42df`, with source version `0.3.0-alpha.8` and storage format `19`. The `v0.3.0-alpha.8` release tag points to `2114f64d142204903540bb41e03b11f0a039caec` and predates the console selector fix.
+- Built the pinned source with the repository Dockerfile and ran the quick-start Compose build in a disposable SQLite environment. A separate disposable PostGIS database and service used the same source image; both passed their backend and console health checks.
+- Ran the Python SDK tutorial code directly from the documentation: draft creation, diff, publication and revision read preserved the `9007199254740993` integer. The container CLI passed `info`, `projects` and a JSON `create_project` call using a private credential file.
+- In the SQLite console, created the tutorial project and dataset, saved and reviewed the exact sample feature, published r1 and r2, then restored r2 as r3. API reads confirmed the expected values at all three revisions. The workspace selector, its menu and adjacent version marker agreed after saving and switching views.
+- Registered a synthetic PostGIS table with the documented HTTP payload. Verified draft isolation, the direct-write guard, idempotent publication, historical reads and a schema-only publication. In the PostGIS console, saving updated the selector and publishing wrote the change to the managed table.
+- SQLite online backup, export, file verification, restore and database comparison passed. A PostGIS native dump was restored to a separate database; service startup rebound the managed table, after which content verification and a new publication succeeded. PostGIS logical export was also imported and verified in an empty SQLite target.
+- Checked 49 distinct pinned source paths against the exact Git object. The site build, integration tests and internal link checks ran via `./scripts/check.sh`. The historical screenshots and their version provenance remain unchanged.
+- The site checkout has no GitNexus index, so graph-based change detection was unavailable. Tests used synthetic fixtures on loopback; they do not establish production, other SDK language, cross-browser or load behavior.

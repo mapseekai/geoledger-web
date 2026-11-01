@@ -12,15 +12,13 @@ lastmod: 2026-11-01
 
 | 维度 | 当前基线值 | 说明与用途 |
 |---|---|---|
-| **文档源码基线（Commit SHA）** | `5bf353c88cb017c8c00035fb86667dd2d7497b43` | 本站所有教程、API 契约与源码引用链接所锚定的精确提交（核对日期：2026-10-29） |
-| **源码版本标识（Version）** | `0.3.0-alpha.7` | Rust 工作区及服务端 `/health` 使用此标识；Python 包元数据使用 PEP 440 格式 `0.3.0a7` |
-| **基线关联的发布标签** | `v0.3.0-alpha.7`（提交 `f0109c8ff424dc974421072cb2ff9b366f12c17a`） | 2026-10-26 发布的预发布标签；源码基线 `5bf353c` 包含该标签之后的主分支工程优化与依赖修复 |
-| **后续预发布标签** | [`v0.3.0-alpha.8`](https://github.com/mapseekai/geoledger/releases/tag/v0.3.0-alpha.8) | 2026-10-30 发布（截至 2026-11-01 核对）；本站示例仍以 `5bf353c` 为准，尚未切换到 alpha.8 |
+| **文档源码基线（Commit SHA）** | `9d31fb5f1e3547ba940518564105cb4a13ea42df` | 本站教程、API 契约与源码引用锚定的精确提交（核对日期：2026-11-01） |
+| **源码版本标识（Version）** | `0.3.0-alpha.8` | Rust 工作区及服务端 `/health` 使用此标识；Python 包元数据使用 PEP 440 格式 `0.3.0a8` |
+| **基线关联的发布标签** | [`v0.3.0-alpha.8`](https://github.com/mapseekai/geoledger/releases/tag/v0.3.0-alpha.8)（提交 `2114f64d142204903540bb41e03b11f0a039caec`） | 2026-10-30 发布；文档基线包含该标签之后的数据来源选择器版本同步修复。已发布的 alpha.8 标签和对应镜像不包含此修复 |
 | **存储格式版本（Storage Format）** | `19` | 服务端启动及备份恢复时强制校验的数据库结构版本号（定义于 `crates/engine/src/lib.rs`） |
 | **业务通信协议** | gRPC `geoledger.v1` · HTTP `/api/v1` | 客户端 SDK、CLI 与外部 HTTP 集成使用的统一协议版本 |
 
-> **如何区分 Release 标签与主分支基线？**
-> 在 `0.x` 预发布阶段，主分支在两次正式打标之间仍会合入工程改进，而 `Cargo.toml` 中的版本号可能暂未递增。因此，复现本站在 **[快速开始]({{< relref "/docs/start/quickstart/" >}})** 中的教程时，请直接 `git checkout 5bf353c88cb017c8c00035fb86667dd2d7497b43`；若需了解正式发布标签与主分支提交之间的具体差异，请分别参阅 **[alpha.7 发布说明]({{< relref "/blog/alpha-7/" >}})** 与 **[主分支工程记录]({{< relref "/blog/main-2026-10-29/" >}})**。
+> **Release 标签与主分支基线**：源码版本号相同并不意味着包含相同的提交。复现本站教程时，请按照 **[快速开始]({{< relref "/docs/start/quickstart/" >}})** 检出 `9d31fb5f1e3547ba940518564105cb4a13ea42df` 并从源码构建；[查看该提交与 alpha.8 标签的差异](https://github.com/mapseekai/geoledger/compare/v0.3.0-alpha.8...9d31fb5f1e3547ba940518564105cb4a13ea42df)。
 
 ## 客户端与服务端配套要求
 
@@ -37,12 +35,12 @@ lastmod: 2026-11-01
 
 ## 文档验证范围与界面截图说明
 
-- **源码级契约核对**：本站每一篇技术文档末尾均附有 **实现依据**，直接链接至固定提交 `5bf353c` 中的源码文件或协议定义。
+- **源码级契约核对**：本站每一篇技术文档末尾均附有 **实现依据**，直接链接至固定提交 `9d31fb5` 中的源码文件或协议定义。
 - **真实测试环境截图**：控制台导览与首页中展示的界面截图均采集自运行真实 PostGIS / SQLite 后端的隔离测试环境（使用合成演示数据，未经任何像素涂改）。采集日期、界面版本、资产哈希与来源记录在站点仓库的 `data/screenshots.json` 中。
 
 ## 实现依据
 
-- [Cargo.toml](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/Cargo.toml)
-- [crates/engine/src/lib.rs](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/crates/engine/src/lib.rs)
-- [proto/geoledger/v1/geoledger.proto](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/proto/geoledger/v1/geoledger.proto)
-- [CHANGELOG.md](https://github.com/mapseekai/geoledger/blob/5bf353c88cb017c8c00035fb86667dd2d7497b43/CHANGELOG.md)
+- [Cargo.toml](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/Cargo.toml)
+- [crates/engine/src/lib.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/src/lib.rs)
+- [proto/geoledger/v1/geoledger.proto](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/proto/geoledger/v1/geoledger.proto)
+- [CHANGELOG.md](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/CHANGELOG.md)
