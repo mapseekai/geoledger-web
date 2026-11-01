@@ -117,6 +117,6 @@ python publish_station.py
 
 ## 实现依据
 
-- [sdk/python/pyproject.toml](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/python/pyproject.toml)
-- [sdk/python/geoledger/__init__.py](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/python/geoledger/__init__.py)
-- [sdk/python/tests/smoke.py](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/python/tests/smoke.py)
+- [sdk/python/pyproject.toml](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/python/pyproject.toml)
+- [sdk/python/geoledger/__init__.py](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/python/geoledger/__init__.py)
+- [sdk/python/tests/smoke.py](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/python/tests/smoke.py)

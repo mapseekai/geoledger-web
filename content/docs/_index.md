@@ -33,6 +33,6 @@ cascade:
 - **技术参考（Reference）**：准确定义 HTTP 接口、四语言 SDK、CLI 命令、游标分页契约、环境变量默认值以及版本兼容性边界。
 - **概念与架构（Architecture & Explanation）**：深入阐述 GeoLedger 的内部机制、版本可见性模型、三方合并规则、空间存储表结构以及单事务一致性保证。
 
-> **版本基线提示**：当前文档基于 GeoLedger 源码版本 `0.3.0-alpha.8`（提交 `9d31fb5`，存储格式版本 `19`）编写与核对。在生产或测试环境中执行操作前，建议先阅读[版本、兼容性与验证范围]({{< relref "/docs/reference/compatibility/" >}})。已发布版本说明与主分支工程演进记录请参阅[项目动态（Blog）]({{< relref "/blog/" >}})。
+> **版本基线提示**：当前文档基于 GeoLedger 发布版本 `v0.3.0-alpha.9`（提交 `7bc8b8f`，存储格式版本 `19`）编写与核对。在生产或测试环境中执行操作前，建议先阅读[版本、兼容性与验证范围]({{< relref "/docs/reference/compatibility/" >}})。已发布版本说明与主分支工程演进记录请参阅[项目动态（Blog）]({{< relref "/blog/" >}})。
 
 ## 按章节浏览

@@ -63,7 +63,7 @@ Web 控制台通过 Next.js BFF（Backend-for-Frontend）与 `geoledger-server` 
 
 ## 实现依据
 
-- [docs/console.md](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/docs/console.md)
-- [web/src/components/map-view.tsx](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/web/src/components/map-view.tsx)
-- [web/src/components/version-graph.tsx](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/web/src/components/version-graph.tsx)
-- [web/src/lib/console-client.ts](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/web/src/lib/console-client.ts)
+- [docs/console.md](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/docs/console.md)
+- [web/src/components/map-view.tsx](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/web/src/components/map-view.tsx)
+- [web/src/components/version-graph.tsx](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/web/src/components/version-graph.tsx)
+- [web/src/lib/console-client.ts](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/web/src/lib/console-client.ts)

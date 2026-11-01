@@ -65,6 +65,6 @@ GeoLedger 在 `geoledger-core` 中实现了确定性的**三方合并**（Three-
 
 ## 实现依据
 
-- [crates/core/src/merge.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/core/src/merge.rs)
-- [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/src/publication.rs)
-- [docs/storage.md](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/docs/storage.md)
+- [crates/core/src/merge.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/core/src/merge.rs)
+- [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/publication.rs)
+- [docs/storage.md](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/docs/storage.md)

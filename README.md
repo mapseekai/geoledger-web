@@ -2,7 +2,7 @@
 
 GeoLedger 的独立介绍与文档网站，基于 **Hugo Extended 0.168.0 + OINK v1.4.0**。首页解释产品与协作流程，Docs 按教程、操作指南、技术参考和概念解释组织，运维指南单独提供入口。Blog 区分正式发布与主分支工程记录。
 
-网站沿用 GeoLedger 控制台的橙色强调、深色导航和中性灰白界面。内容基线保存在 `data/project.json`：源码 `0.3.0-alpha.8`、存储格式 `19`、提交 `9d31fb5f1e3547ba940518564105cb4a13ea42df`（包含 alpha.8 标签后的控制台修复）。
+网站沿用 GeoLedger 控制台的橙色强调、深色导航和中性灰白界面。内容基线保存在 `data/project.json`：源码 `0.3.0-alpha.9`、存储格式 `19`、提交 `7bc8b8fac039cfa8f9f659787eeef055fc34ea67`（对应发布标签 `v0.3.0-alpha.9`）。
 
 [在线文档](https://mapseekai.github.io/geoledger-web/) | [网站源码](https://github.com/mapseekai/geoledger-web) | [GeoLedger 项目](https://github.com/mapseekai/geoledger)
 

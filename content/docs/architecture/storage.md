@@ -66,7 +66,7 @@ GeoLedger 的**存储格式 `19`** 采用 **“当前状态分表存储 + 增量
 
 ## 实现依据
 
-- [crates/engine/src/repository.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/src/repository.rs)
-- [crates/engine/src/session/query.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/src/session/query.rs)
-- [crates/engine/tests/conformance.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/tests/conformance.rs)
-- [docs/storage.md](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/docs/storage.md)
+- [crates/engine/src/repository.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/repository.rs)
+- [crates/engine/src/session/query.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/session/query.rs)
+- [crates/engine/tests/conformance.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/tests/conformance.rs)
+- [docs/storage.md](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/docs/storage.md)

@@ -122,6 +122,6 @@ lastmod: 2026-11-01
 
 ## 实现依据
 
-- [docs/console.md](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/docs/console.md)
-- [crates/engine/src/workspace.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/src/workspace.rs)
-- [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/src/publication.rs)
+- [docs/console.md](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/docs/console.md)
+- [crates/engine/src/workspace.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/workspace.rs)
+- [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/publication.rs)

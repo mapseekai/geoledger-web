@@ -1,8 +1,8 @@
 {
   "name": "GeoLedger",
-  "version": "0.3.0-alpha.8",
+  "version": "0.3.0-alpha.9",
   "storage_format": 19,
-  "source_commit": "9d31fb5f1e3547ba940518564105cb4a13ea42df",
+  "source_commit": "7bc8b8fac039cfa8f9f659787eeef055fc34ea67",
   "verified_at": "2026-11-01",
   "theme": {
     "repository": "pgsty/oink",

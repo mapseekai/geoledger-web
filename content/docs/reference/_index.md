@@ -14,7 +14,7 @@ cascade:
 
 ## 参考目录
 
-- **[版本、兼容性与验证范围]({{< relref "/docs/reference/compatibility/" >}})**：核对文档对应的源码提交基线（`9d31fb5`）、关联发布标签（`v0.3.0-alpha.8`）、存储格式版本（`19`）与协议包名（`geoledger.v1`）。
+- **[版本、兼容性与验证范围]({{< relref "/docs/reference/compatibility/" >}})**：核对文档对应的源码提交基线（`7bc8b8f`）、发布标签（`v0.3.0-alpha.9`）、存储格式版本（`19`）与协议包名（`geoledger.v1`）。
 - **[SDK 接入与类型参考]({{< relref "/docs/reference/sdk/" >}})**：查阅 Rust、Go、TypeScript / Node.js 与 Python 四语言客户端的安装方式、连接选项、业务方法矩阵、64 位大整数处理及工作区并发约定。
 - **[HTTP 业务 API 参考]({{< relref "/docs/reference/http/" >}})**：查阅 `POST /api/v1/{operation}` 的业务操作、JSON 请求与响应契约、空值语义及 HTTP 状态码映射。
 - **[CLI 命令行参考]({{< relref "/docs/reference/cli/" >}})**：查阅远程客户端 `gl` 的全局连接参数、凭据文件安全要求、快捷查询子命令与通用 `call` 调用方式。

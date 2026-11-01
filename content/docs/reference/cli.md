@@ -104,5 +104,5 @@ printf '%s\n' '{"name":"城市管网巡检"}' \
 
 ## 实现依据
 
-- [crates/cli/src/main.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/cli/src/main.rs)
-- [sdk/rust/src/lib.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/rust/src/lib.rs)
+- [crates/cli/src/main.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/cli/src/main.rs)
+- [sdk/rust/src/lib.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/rust/src/lib.rs)

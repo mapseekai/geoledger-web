@@ -1,6 +1,6 @@
 # Verification record — 2026-10-29
 
-The 2026-10-29 results below are historical; the current baseline was checked separately in the 2026-11-01 entry at the end of this file.
+The entries below record separate checks against their stated baselines.
 
 Baseline: GeoLedger `5bf353c88cb017c8c00035fb86667dd2d7497b43`, OINK `v1.4.0`, Hugo Extended `0.168.0`.
 
@@ -49,7 +49,7 @@ GeoLedger startup, SDK network writes and database recovery were not executed du
 
 ## Pinned source revalidation, 2026-11-01
 
-- The documentation baseline is GeoLedger `9d31fb5f1e3547ba940518564105cb4a13ea42df`, with source version `0.3.0-alpha.8` and storage format `19`. The `v0.3.0-alpha.8` release tag points to `2114f64d142204903540bb41e03b11f0a039caec` and predates the console selector fix.
+- The documentation baseline for this check was GeoLedger `9d31fb5f1e3547ba940518564105cb4a13ea42df`, with source version `0.3.0-alpha.8` and storage format `19`. The `v0.3.0-alpha.8` release tag points to `2114f64d142204903540bb41e03b11f0a039caec` and predates the console selector fix.
 - Built the pinned source with the repository Dockerfile and ran the quick-start Compose build in a disposable SQLite environment. A separate disposable PostGIS database and service used the same source image; both passed their backend and console health checks.
 - Ran the Python SDK tutorial code directly from the documentation: draft creation, diff, publication and revision read preserved the `9007199254740993` integer. The container CLI passed `info`, `projects` and a JSON `create_project` call using a private credential file.
 - In the SQLite console, created the tutorial project and dataset, saved and reviewed the exact sample feature, published r1 and r2, then restored r2 as r3. API reads confirmed the expected values at all three revisions. The workspace selector, its menu and adjacent version marker agreed after saving and switching views.
@@ -57,3 +57,11 @@ GeoLedger startup, SDK network writes and database recovery were not executed du
 - SQLite online backup, export, file verification, restore and database comparison passed. A PostGIS native dump was restored to a separate database; service startup rebound the managed table, after which content verification and a new publication succeeded. PostGIS logical export was also imported and verified in an empty SQLite target.
 - Checked 49 distinct pinned source paths against the exact Git object. The site build, integration tests and internal link checks ran via `./scripts/check.sh`. The historical screenshots and their version provenance remain unchanged.
 - The site checkout has no GitNexus index, so graph-based change detection was unavailable. Tests used synthetic fixtures on loopback; they do not establish production, other SDK language, cross-browser or load behavior.
+
+## Alpha.9 release revalidation, 2026-11-01
+
+- GeoLedger release `v0.3.0-alpha.9` points to `7bc8b8fac039cfa8f9f659787eeef055fc34ea67`. Its signed Docker Hub image index is `sha256:3fdf1371c3a1ecf8f4989c5de52cbb3dceec5807ecd8b6069dc0905b0cf0afcd`, containing `linux/amd64` and `linux/arm64` manifests.
+- The [release workflow](https://github.com/mapseekai/geoledger/actions/runs/41282252666) passed same-commit Linux and Windows checks, SDK roundtrips on SQLite and PostGIS, PostGIS release validation, performance gates, build and runtime scans, signing, and native image acceptance on both architectures.
+- On the local ARM64 host, pulled the released image by index digest and confirmed the embedded source revision. Disposable SQLite and PostGIS instances passed readiness and console health checks. The documented Python SDK example preserved its 64-bit integer, and the PostGIS registration example passed draft isolation, publication retry, source-table writeback and historical reads.
+- In the released image's SQLite console, saving and editing a feature advanced the data source picker to `v1` and `v2`; the menu and adjacent badge also showed `v1` after the first save. The local candidate image passed the same focused check before publication.
+- The documentation source links were checked against the release commit, and the site build, integration tests and subpath link checks ran in a clean draft checkout. Existing console screenshots retain their original version provenance.

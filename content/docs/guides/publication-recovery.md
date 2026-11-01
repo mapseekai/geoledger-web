@@ -106,7 +106,7 @@ if err != nil {
 
 ## 实现依据
 
-- [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/engine/src/publication.rs)
-- [sdk/python/geoledger/__init__.py](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/python/geoledger/__init__.py)
-- [sdk/ts/src/index.ts](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/sdk/ts/src/index.ts)
-- [docs/api.md](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/docs/api.md)
+- [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/publication.rs)
+- [sdk/python/geoledger/__init__.py](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/python/geoledger/__init__.py)
+- [sdk/ts/src/index.ts](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/ts/src/index.ts)
+- [docs/api.md](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/docs/api.md)

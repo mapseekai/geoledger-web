@@ -8,7 +8,7 @@ lastmod: 2026-10-31
 
 本文汇总源码仓库保留的历史性能测试结果，并说明如何在目标环境中测量容量。
 
-下列数据来自 2026-10-11 的格式 13 测试：PostGIS 使用 `v0.3.0-alpha.2` 候选构建，SQLite 使用同日上一候选构建。当前固定源码使用存储格式 19，因此这些结果不能代表当前版本或生产容量。完整条件与报告见[源码性能测试说明](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/docs/performance.md)。
+下列数据来自 2026-10-11 的格式 13 测试：PostGIS 使用 `v0.3.0-alpha.2` 候选构建，SQLite 使用同日上一候选构建。当前固定源码使用存储格式 19，因此这些结果不能代表当前版本或生产容量。完整条件与报告见[源码性能测试说明](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/docs/performance.md)。
 
 ---
 
@@ -115,7 +115,7 @@ python3 scripts/benchmark.py \
 
 ## 实现依据
 
-- [docs/performance.md](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/docs/performance.md)
-- [crates/server/src/limits.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/server/src/limits.rs)
-- [scripts/benchmark_incremental.py](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/scripts/benchmark_incremental.py)
-- [crates/server/src/http.rs](https://github.com/mapseekai/geoledger/blob/9d31fb5f1e3547ba940518564105cb4a13ea42df/crates/server/src/http.rs)
+- [docs/performance.md](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/docs/performance.md)
+- [crates/server/src/limits.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/server/src/limits.rs)
+- [scripts/benchmark_incremental.py](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/scripts/benchmark_incremental.py)
+- [crates/server/src/http.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/server/src/http.rs)

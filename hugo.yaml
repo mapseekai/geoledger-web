@@ -32,7 +32,7 @@ params:
   github_repo: https://github.com/mapseekai/geoledger-web
   github_branch: main
   github_project_repo: https://github.com/mapseekai/geoledger
-  version: 0.3.0-alpha.8
+  version: 0.3.0-alpha.9
   offline_search: true
   offline_search_on_serve: true
   offline_search_max_results: 12
