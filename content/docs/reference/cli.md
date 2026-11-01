@@ -102,7 +102,51 @@ printf '%s\n' '{"name":"城市管网巡检"}' \
   - 若为本地参数或文件权限错误，则向 `stderr` 输出 `gl: <错误原因>`。
 - **发布超时后的安全恢复**：当通过 `gl call publish --file publish.json` 发布工作区遇到超时或网络中断时，请保留完整的 `publish.json`，使用同一身份重放。已提交且仍有读取权限时返回原回执；否则可能重新尝试发布或返回错误（详见 **[发布结果恢复]({{< relref "/docs/guides/publication-recovery/" >}})**）。
 
+## 6. 使用 `jq` 处理命令输出
+
+以下示例使用已配置连接与凭据的 `gl` 和本机安装的 `jq`。在 Bash 或 zsh 脚本中，先运行 `set -o pipefail`，并检查命令退出状态，避免管道掩盖 `gl` 的失败。
+
+不同版本或构建的 `jq` 对大整数和高精度小数的处理可能不同。修订号、要素属性或坐标中的数值如果不能承受舍入，请使用支持所需数值精度的 SDK 或 JSON 工具。
+
+### 提取活跃项目与 ID 映射
+
+```sh
+# 输出本页活跃项目的 UUID 和名称
+gl projects | jq -r '.projects[] | select(.state == "active") | "\(.project)\t\(.name)"'
+```
+
+`gl projects` 只读取前 100 个项目；如需完整列表，使用 `gl call list_projects` 继续分页。
+
+### 查看历史末页的最新修订说明
+
+```sh
+# 将 UUID 替换为实际项目；若还有后续页，按提示带上 --after 继续查询
+gl history 0192d4a0-0000-7000-8000-000000000001 \
+  | jq -r 'if .next_after != null then
+      "还有后续页，请使用 --after \(.next_after) 继续"
+    elif (.commits | length) == 0 then
+      "本页没有修订"
+    else
+      .commits[-1] | "最新修订: r\(.revision) | 说明: \(.message) | 发布时间: \(.created_at)"
+    end'
+```
+
+`history` 按修订号升序返回，每次最多 100 条；只有到达末页，最后一条才是该次读取时的最新修订。
+
+### 将一页要素导出为 GeoJSON Lines
+
+```sh
+# 替换为实际的项目 UUID 和数据集 UUID
+printf '%s\n' '{"project":"0192d4a0-0000-7000-8000-000000000001","dataset":"0192d4a0-0000-7000-8000-000000000002","limit":100}' \
+  | gl call features > page.json &&
+  jq -c '.features[]' page.json > roads.jsonl &&
+  jq '{revision, next_after}' page.json
+```
+
+此命令仅导出一页。如果 `next_after` 非空，后续请求需带上该游标并固定首屏的 `revision`，逐页追加结果；参见[分页与一致性参考]({{< relref "/docs/reference/pagination/" >}})。
+
 ## 实现依据
 
 - [crates/cli/src/main.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/cli/src/main.rs)
 - [sdk/rust/src/lib.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/rust/src/lib.rs)
+- [proto/geoledger/v1/geoledger.proto](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/proto/geoledger/v1/geoledger.proto)

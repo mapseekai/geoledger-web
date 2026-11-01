@@ -115,8 +115,26 @@ python publish_station.py
 2. **游标分页遍历**：当数据集要素或历史记录较多时，使用服务端返回的 `next_after` 游标并在后续请求中固定首屏 `revision`。详见 **[分页与一致性参考]({{< relref "/docs/reference/pagination/" >}})**。
 3. **多语言客户端支持**：如果你使用 Rust、Go 或 TypeScript / Node.js，请查阅 **[SDK 接入与类型参考]({{< relref "/docs/reference/sdk/" >}})**。
 
+## 附：四语言 SDK 核心操作对照速查
+
+下表中的 `p_id` 和 `d_id` 是项目、数据集 UUID 字符串，`feature` 是带字符串 `id` 的 GeoJSON Feature，`draft` 是对应项目的工作区句柄。Go 示例将 SDK 导入为 `geoledger`，`ctx` 是 `context.Context`；TypeScript 示例从 `@geoledger/client` 导入 `Client`；Rust 示例使用 `geoledger_client` 导出的 `Client`、`Page` 和 `FeatureQuery`。表格可横向滚动。
+
+| <span style="white-space:nowrap">业务场景</span> | Python SDK | Go SDK | TypeScript / Node.js SDK | Rust SDK |
+|---|---|---|---|---|
+| <strong style="white-space:nowrap">创建客户端</strong> | `Client(endpoint, api_key)` | `geoledger.Dial(endpoint, api_key)` | `new Client(endpoint, apiKey)` | `Client::connect(endpoint, api_key).await?` |
+| <strong style="white-space:nowrap">创建工作区</strong> | `client.create_workspace(p_id)` | `client.CreateWorkspace(ctx, p_id)` | `await client.createWorkspace(p_id)` | `client.create_workspace(p_id).await?` |
+| <strong style="white-space:nowrap">保存要素</strong> | `draft.save(d_id, feature)` | `draft.Save(ctx, d_id, feature)` | `await draft.save(d_id, feature)` | `draft.save(d_id, feature).await?` |
+| <strong style="white-space:nowrap">差异审阅</strong> | `draft.diff()` | `draft.Diff(ctx, geoledger.Page{})` | `await draft.diff()` | `draft.diff(Page::default()).await?` |
+| <strong style="white-space:nowrap">原子发布</strong> | `draft.publish(message)` | `draft.Publish(ctx, message)` | `await draft.publish(message)` | `draft.publish(message).await?` |
+| <strong style="white-space:nowrap">固定快照读取</strong> | `client.features(p_id, d_id, revision=rev)` | `client.Features(ctx, p_id, d_id, geoledger.FeatureQuery{Revision: &rev})` | `await client.features(p_id, d_id, { revision: rev })` | `client.features(p_id, d_id, FeatureQuery { revision: Some(rev), ..Default::default() }).await?` |
+
+固定快照中的 `rev` 在 Go 和 Rust 中是 `int64` / `i64`，在 TypeScript 中是 `bigint`。Go 方法返回值和 `error`，实际代码需要检查错误并在用完后关闭客户端；Rust 的保存与发布需要可变的 `draft`，且 `save` 接收 `serde_json::Value`。查询和差异都是分页结果，完整示例与续页方式见 **[SDK 接入与类型参考]({{< relref "/docs/reference/sdk/" >}})**。
+
 ## 实现依据
 
 - [sdk/python/pyproject.toml](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/python/pyproject.toml)
 - [sdk/python/geoledger/__init__.py](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/python/geoledger/__init__.py)
 - [sdk/python/tests/smoke.py](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/python/tests/smoke.py)
+- Go：[client.go](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/go/client.go) · [workspace.go](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/go/workspace.go) · [models.go](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/go/models.go)
+- TypeScript：[index.ts](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/ts/src/index.ts) · [models.ts](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/ts/src/models.ts)
+- Rust：[lib.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/rust/src/lib.rs) · [models.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/sdk/rust/src/models.rs)

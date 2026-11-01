@@ -25,7 +25,8 @@ lastmod: 2026-11-01
 3. 查看日志中的具体启动错误：
    - 是否未设置 `GL_WEB_SESSION_SECRET`（要求至少 32 字符）？
    - 数据目录 `/data`（或 `GL_DATA_DIR`）是否挂载了旧版本遗留的低格式数据库（当前要求存储格式 `19`）？
-   - 本机编译运行时，是否缺少 SpatiaLite 原生扩展（`mod_spatialite`）或端口 `7881` / `7882` / `3000` 已被占用？
+   - **SpatiaLite 扩展无法加载**：本机使用 SQLite 时，若日志包含 `cannot load SpatiaLite`，请安装可加载的 `mod_spatialite` 扩展及其依赖；Debian / Ubuntu 可使用 `libsqlite3-mod-spatialite` 包。默认加载 `mod_spatialite`，也可将 `GL_SPATIALITE_EXTENSION` 设为本机可信扩展的实际路径，例如 Linux x86-64 的 `/usr/lib/x86_64-linux-gnu/mod_spatialite.so` 或 Apple Silicon Homebrew 的 `/opt/homebrew/lib/mod_spatialite.dylib`；路径随平台和安装方式变化。
+   - 本机端口 `7881`（HTTP）、`7882`（gRPC）或 `3000`（Web）已被其他进程占用？
 
 ### 解决方案
 - 补齐缺失的环境变量（参见 **[配置参数参考]({{< relref "/docs/reference/configuration/" >}})**）。
@@ -76,6 +77,7 @@ lastmod: 2026-11-01
 |---|---|---|
 | **工作区版本不匹配（`workspace version mismatch`）** | 本地持有的 `expected_workspace_version` 落后于服务端工作区的最新 `version` | 调用 `get_workspace` / `refresh` 刷新工作区状态，检查是否有其他终端已写入草稿，确认后再提交 |
 | **存在合并冲突或 `stale_resolution`** | 共享 `HEAD` 已推进且存在同一字段/几何冲突，或先前的冲突裁决因上下文变化而失效 | 调用 `conflicts` 分页读取最新的 `base` / `current` / `draft`，提交完整裁决结果（`resolve`）并执行 `rebase`（切勿仅修改版本号强行覆盖） |
+| **业务源表发生漂移** | 返回 `business table changed outside GeoLedger; reconcile the source before publishing`。可能是源表结构或保护触发器发生变化，也可能检测到绕过 GeoLedger 的写入 | 暂停受影响的写入，保留完整数据库备份与变更证据，由 DBA 核对源表和触发器；在隔离环境验证[备份恢复]({{< relref "/docs/operations/backup/" >}})方案，并评估备份之后的数据。不要直接清空 `gl_source_changes` 或删除数据集来消除报错：删除数据集会清理相关版本历史，参见 [PostGIS 表纳管]({{< relref "/docs/guides/postgis/" >}}) |
 | **字段变更基线失效（Schema 意图冲突）** | 工作区包含 `schema_edits`，但期间项目 `HEAD` 已被其他提交推进 | 先传空数组 `schema_edits: []` 撤销旧字段意图，执行 `rebase` 并读取最新 `schema` 后重新声明字段变更（见[字段增删指南]({{< relref "/docs/guides/schema/" >}})） |
 | **项目已归档或工作区已关闭** | 目标项目处于 `archived`（只读）状态，或工作区已 `published` / `discarded` | 归档项目需由 `owner` 恢复后才可写入；已发布的工作区不可再次修改，请创建新工作区 |
 
@@ -118,6 +120,8 @@ lastmod: 2026-11-01
 ## 实现依据
 
 - [crates/server/src/main.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/server/src/main.rs)
+- [crates/spatialite/src/lib.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/spatialite/src/lib.rs) · [crates/engine/src/session.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/session.rs)
+- [crates/engine/src/session/tables.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/session/tables.rs)
 - [crates/engine/src/workspace.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/workspace.rs)
 - [crates/engine/src/publication.rs](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/crates/engine/src/publication.rs)
 - [docs/security.md](https://github.com/mapseekai/geoledger/blob/7bc8b8fac039cfa8f9f659787eeef055fc34ea67/docs/security.md)
