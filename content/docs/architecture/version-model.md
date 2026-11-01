@@ -9,18 +9,7 @@ lastmod: 2026-10-29
 
 ## 对象关系
 
-```mermaid
-flowchart TD
-  P[Project 项目] --> D1[Dataset 道路]
-  P --> D2[Dataset 设施]
-  P --> H[HEAD 当前共享修订]
-  P --> W[Workspace 工作区]
-  W --> B[base_revision 固定基线]
-  W --> V[version 乐观编辑版本]
-  W --> DELTA[跨数据集草稿增量]
-  W -->|Publish| R[新的项目级 Revision]
-  R --> H
-```
+{{< version-model >}}
 
 Project 统一分配共享修订。多个数据集的修改可以在一个工作区中准备，最终进入同一事务和同一个修订。
 

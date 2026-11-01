@@ -26,6 +26,10 @@ lastmod: 2026-10-29
 
 不要只根据网络错误、HTTP 超时或界面关闭推断数据库已回滚。发布事务的原子性和响应丢失机制见[事务解释]({{< relref "/docs/architecture/transactions/" >}})。
 
+### 发布故障恢复决策流程图
+
+{{< publication-recovery-flow >}}
+
 ## 2. 在原句柄上确认
 
 SDK 工作区句柄保留待确认请求。使用原工作区和原说明再次调用 Publish，句柄重用原始请求 ID 与内容。

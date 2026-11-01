@@ -91,23 +91,32 @@ try {
         await page.screenshot({ path: path.join(output, "blog-desktop.png") });
     }
   }
-  for (const slug of ["version-model", "merge", "storage", "transactions"]) {
-    await page.goto(`${base}/docs/architecture/${slug}/`);
-    await page.evaluate(() =>
-      document
-        .querySelector("[data-td-diagram-stage]")
-        ?.scrollIntoView({ block: "center" }),
+  for (const [route, container] of [
+    ["/docs/architecture/version-model/", ".gl-version-model"],
+    ["/docs/architecture/merge/", ".gl-merge-flow"],
+    ["/docs/architecture/storage/", ".gl-storage-flow"],
+    ["/docs/architecture/transactions/", "[data-td-diagram-stage]"],
+    ["/docs/guides/publication-recovery/", ".gl-publication-recovery-flow"],
+  ]) {
+    await page.goto(`${base}${route}`);
+    const selector = `${container} ${container === "[data-td-diagram-stage]" ? "svg" : "img"}`;
+    await page.evaluate((target) =>
+      document.querySelector(target)?.scrollIntoView({ block: "center" }),
+      container,
     );
     await page.waitForFunction(
-      () => document.querySelector("[data-td-diagram-stage] svg"),
-      undefined,
+      (target) => {
+        const node = document.querySelector(target);
+        return node && (node.tagName.toLowerCase() !== "img" || node.naturalWidth > 0);
+      },
+      selector,
       { timeout: 15000 },
     );
-    const result = await page.evaluate(() => ({
+    const result = await page.evaluate((target) => ({
       path: location.pathname,
-      count: document.querySelectorAll("[data-td-diagram-stage] svg").length,
+      count: document.querySelectorAll(target).length,
       errors: window.__glTestErrors ?? [],
-    }));
+    }), selector);
     report.diagrams.push(result);
     if (!result.count || result.errors.length) report.failures.push(result);
   }

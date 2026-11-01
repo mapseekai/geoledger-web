@@ -27,18 +27,7 @@ Base 是工作区基础修订的数据；Current 是最新共享数据；Draft �
 
 ## 冲突处理循环
 
-```mermaid
-flowchart LR
-  D[读取差异] --> C{存在冲突?}
-  C -->|否| P[发布时再次检查]
-  C -->|是| R[读取 Base / Current / Draft]
-  R --> F[提交完整最终 Feature]
-  F --> B[Rebase 更新基线]
-  B --> P
-  P --> H{上下文仍有效?}
-  H -->|是| T[原子提交]
-  H -->|否| D
-```
+{{< merge-flow >}}
 
 Resolve 请求携带当前 HEAD 和工作区版本，解决选择只对这个上下文有效。共享版本或草稿再次变化后，原选择可能标记为 `stale_resolution`，需要重新确认。
 

@@ -9,16 +9,7 @@ lastmod: 2026-10-29
 
 ## 三种数据状态
 
-```mermaid
-flowchart TD
-  W[工作区草稿增量] --> M[发布合并暂存]
-  M -->|更新当前状态| F[各 Dataset 独立正式表 / 纳管原表]
-  F -->|被替换或删除的旧正文| H[gl_history 历史区间]
-  M --> C[Commit / Changes / HEAD]
-  M --> S[Schema History / Receipt / Audit]
-  F --> Q[按修订构造可见要素]
-  H --> Q
-```
+{{< storage-flow >}}
 
 图中发布涉及的写入属于同一数据库事务。箭头描述数据关系，不代表后台异步复制流水线。
 

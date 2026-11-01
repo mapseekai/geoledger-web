@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="900" viewBox="0 0 1160 900" role="img" aria-labelledby="title desc">
+  <title id="title">数据流转与物理存储布局</title>
+  <desc id="desc">工作区草稿增量进入事务内合并暂存区，再写入数据集正式表、提交与变更索引，以及字段历史、发布回执和审计。被覆盖或删除的旧正文归档到历史区间表；正式表与历史表共同构造目标修订的要素视图。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow" d="M0 0L10 5L0 10Z"/></marker>
+  </defs>
+  <style>
+    text { font-family: Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif; text-anchor: middle; }
+    .canvas { fill: #fff; }
+    .node { fill: #f8fafc; stroke: #d0d5dd; stroke-width: 1.5; }
+    .draft { fill: #0b1220; stroke: #0b1220; }
+    .stage { fill: #fff4ed; stroke: #f4b294; }
+    .view { fill: #fff; stroke: #98a2b3; }
+    .name { fill: #101828; font-size: 23px; font-weight: 650; }
+    .detail { fill: #475467; font-size: 19px; }
+    .light { fill: #fff; }
+    .light-detail { fill: #cbd5e1; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 18px; }
+    .accent { fill: #cc3a05; }
+    .edge-label { fill: #667085; font-size: 16px; }
+    .line { fill: none; stroke: #98a2b3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .arrow { fill: #98a2b3; }
+    @media (prefers-color-scheme: dark) {
+      .canvas { fill: #101722; }
+      .node { fill: #182334; stroke: #475467; }
+      .draft { fill: #253248; stroke: #607086; }
+      .stage { fill: #35251f; stroke: #b76a48; }
+      .view { fill: #182334; stroke: #667085; }
+      .name { fill: #f2f4f7; }
+      .detail { fill: #cbd5e1; }
+      .accent { fill: #ff9b72; }
+      .edge-label { fill: #a4afc0; }
+    }
+  </style>
+  <rect class="canvas" width="1160" height="900" rx="14"/>
+
+  <g class="line" marker-end="url(#arrow)">
+    <path d="M580 123V165"/>
+    <path d="M480 260V302H205V380"/>
+    <path d="M580 260V380"/>
+    <path d="M680 260V302H955V380"/>
+    <path d="M205 520V566H580V610"/>
+    <path d="M100 520V825H390"/>
+    <path d="M580 700V780"/>
+  </g>
+
+  <rect class="node draft" x="390" y="25" width="380" height="98" rx="12"/>
+  <text class="name light" x="580" y="65">工作区草稿增量</text>
+  <text class="detail light-detail mono" x="580" y="96">gl_deltas / gl_workspace_schemas</text>
+  <rect class="node stage" x="390" y="165" width="380" height="95" rx="12"/>
+  <text class="name accent" x="580" y="204">事务内合并暂存区</text>
+  <text class="detail" x="580" y="233">Merge Stage</text>
+
+  <text class="edge-label" x="300" y="286">写入最新状态与 DDL</text>
+  <rect class="node" x="40" y="380" width="330" height="140" rx="12"/>
+  <text class="name" x="205" y="420">各 Dataset 独立正式表</text>
+  <text class="detail mono" x="205" y="452">gl_data_*</text>
+  <text class="detail" x="205" y="482">PostGIS 纳管原表</text>
+  <rect class="node" x="410" y="380" width="340" height="140" rx="12"/>
+  <text class="name" x="580" y="420">提交与变更索引</text>
+  <text class="detail mono" x="580" y="452">gl_commits</text>
+  <text class="detail mono" x="580" y="482">gl_commit_changes</text>
+  <rect class="node" x="790" y="380" width="330" height="140" rx="12"/>
+  <text class="name" x="955" y="414">字段历史 / 幂等回执 / 审计</text>
+  <text class="detail mono" x="955" y="446">gl_schema_history</text>
+  <text class="detail mono" x="955" y="473">gl_publication_receipts</text>
+  <text class="detail mono" x="955" y="500">gl_audit</text>
+
+  <text class="edge-label" x="400" y="551">归档被覆盖或删除的旧正文</text>
+  <rect class="node" x="390" y="610" width="380" height="90" rx="12"/>
+  <text class="name" x="580" y="647">历史区间表</text>
+  <text class="detail mono" x="580" y="676">gl_history</text>
+  <rect class="node view" x="390" y="780" width="380" height="90" rx="12"/>
+  <text class="name" x="580" y="817">按目标 Revision</text>
+  <text class="detail" x="580" y="846">实时构造一致性要素视图</text>
+</svg>

@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="1420" viewBox="0 0 1160 1420" role="img" aria-labelledby="title desc">
+  <title id="title">发布故障恢复决策流程</title>
+  <desc id="desc">发布成功后获取回执。明确拒绝时修正问题后发起新发布；结果未知时，在原进程中使用同一句柄和说明重试，或在重启后还原原意图并重放。意图丢失或仍无法确认时，通过 API 核查工作区状态和提交历史。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow" d="M0 0L10 5L0 10Z"/></marker>
+  </defs>
+  <style>
+    text { font-family: Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif; text-anchor: middle; }
+    .canvas { fill: #fff; }
+    .node { fill: #f8fafc; stroke: #d0d5dd; stroke-width: 1.5; }
+    .start { fill: #0b1220; stroke: #0b1220; }
+    .action { fill: #fff4ed; stroke: #f4b294; }
+    .name { fill: #101828; font-size: 23px; font-weight: 650; }
+    .detail { fill: #475467; font-size: 19px; }
+    .light { fill: #fff; }
+    .light-detail { fill: #cbd5e1; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .accent { fill: #cc3a05; }
+    .branch { fill: #667085; font-size: 16px; font-weight: 650; }
+    .branch-accent { fill: #cc3a05; }
+    .branch-side { text-anchor: start; }
+    .branch-end { text-anchor: end; }
+    .line { fill: none; stroke: #98a2b3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .arrow { fill: #98a2b3; }
+    @media (prefers-color-scheme: dark) {
+      .canvas { fill: #101722; }
+      .node { fill: #182334; stroke: #475467; }
+      .start { fill: #253248; stroke: #607086; }
+      .action { fill: #35251f; stroke: #b76a48; }
+      .name { fill: #f2f4f7; }
+      .detail { fill: #cbd5e1; }
+      .accent { fill: #ff9b72; }
+      .branch { fill: #a4afc0; }
+      .branch-accent { fill: #ff9b72; }
+    }
+  </style>
+  <rect class="canvas" width="1160" height="1420" rx="14"/>
+
+  <g class="line" marker-end="url(#arrow)">
+    <path d="M580 105V120"/>
+    <path d="M420 175H210V275"/>
+    <path d="M580 230V280"/>
+    <path d="M420 335H388V490H375"/>
+    <path d="M580 390V435"/>
+    <path d="M420 490H408V580H235V610"/>
+    <path d="M740 490H925V610"/>
+    <path d="M235 715V745"/>
+    <path d="M75 800H20V662.5H45"/>
+    <path d="M235 855V1000"/>
+    <path d="M925 715V785"/>
+    <path d="M925 890V930"/>
+    <path d="M925 1040V1110"/>
+    <path d="M1115 662.5H1140V1342.5H1115"/>
+  </g>
+  <path class="line" d="M1085 985H1140"/>
+
+  <rect class="node start" x="405" y="25" width="350" height="80" rx="12"/>
+  <text class="name light" x="580" y="57">发起发布</text>
+  <text class="detail light-detail mono" x="580" y="84">draft.publish(message)</text>
+
+  <path class="node" d="M580 120L740 175L580 230L420 175Z"/>
+  <text class="name" x="580" y="169">调用是否</text>
+  <text class="name" x="580" y="197">抛出异常？</text>
+  <text class="branch" x="350" y="160">否</text>
+  <text class="branch branch-accent branch-side" x="600" y="261">是</text>
+  <rect class="node" x="45" y="275" width="330" height="100" rx="12"/>
+  <text class="name" x="210" y="316">成功获取回执</text>
+  <text class="detail mono" x="210" y="346">status: published</text>
+
+  <path class="node" d="M580 280L740 335L580 390L420 335Z"/>
+  <text class="name mono" x="580" y="329">err.uncertain</text>
+  <text class="name mono" x="580" y="357">== true ?</text>
+  <text class="branch" x="315" y="410">否 · 明确拒绝</text>
+  <text class="branch branch-accent branch-side" x="600" y="419">是 · 结果未知</text>
+  <rect class="node" x="45" y="430" width="330" height="120" rx="12"/>
+  <text class="name" x="210" y="467">事务确定未提交</text>
+  <text class="detail" x="210" y="497">解决冲突、修正参数</text>
+  <text class="detail" x="210" y="525">再发起新发布</text>
+
+  <path class="node" d="M580 435L740 490L580 545L420 490Z"/>
+  <text class="name" x="580" y="483">客户端进程</text>
+  <text class="name" x="580" y="511">是否仍存活？</text>
+  <text class="branch branch-accent" x="315" y="568">是 · 原进程</text>
+  <text class="branch" x="840" y="475">否 · 已重启</text>
+
+  <rect class="node action" x="45" y="610" width="380" height="105" rx="12"/>
+  <text class="name accent" x="235" y="650">使用原工作区句柄</text>
+  <text class="detail" x="235" y="681">相同 message 再次 publish()</text>
+  <path class="node" d="M235 745L395 800L235 855L75 800Z"/>
+  <text class="name" x="235" y="793">是否成功</text>
+  <text class="name" x="235" y="821">确认？</text>
+  <text class="branch branch-end" x="68" y="783">仍超时</text>
+  <text class="branch branch-accent branch-side" x="255" y="920">是</text>
+  <rect class="node" x="45" y="1000" width="380" height="90" rx="12"/>
+  <text class="name" x="235" y="1037">成功获取回执</text>
+  <text class="detail mono" x="235" y="1066">status: published</text>
+
+  <rect class="node action" x="735" y="610" width="380" height="105" rx="12"/>
+  <text class="name accent" x="925" y="650">还原待确认发布意图</text>
+  <text class="detail mono" x="925" y="681">pending_publication</text>
+  <text class="branch branch-side" x="945" y="755">已还原</text>
+  <text class="branch branch-end" x="1125" y="749">意图丢失</text>
+  <rect class="node" x="735" y="785" width="380" height="105" rx="12"/>
+  <text class="name" x="925" y="825">重放原发布意图</text>
+  <text class="detail mono" x="925" y="856">client.publish(intent)</text>
+  <path class="node" d="M925 930L1085 985L925 1040L765 985Z"/>
+  <text class="name" x="925" y="978">是否成功</text>
+  <text class="name" x="925" y="1006">确认？</text>
+  <text class="branch branch-end" x="1130" y="970">仍不可用</text>
+  <text class="branch branch-accent branch-side" x="945" y="1080">是</text>
+  <rect class="node" x="735" y="1110" width="380" height="90" rx="12"/>
+  <text class="name" x="925" y="1147">成功获取回执</text>
+  <text class="detail mono" x="925" y="1176">status: published</text>
+  <rect class="node" x="735" y="1290" width="380" height="105" rx="12"/>
+  <text class="name" x="925" y="1330">通过 API 检查</text>
+  <text class="detail" x="925" y="1362">工作区状态与提交历史</text>
+</svg>

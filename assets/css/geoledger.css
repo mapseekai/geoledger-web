@@ -39,7 +39,11 @@ button {
   touch-action: manipulation;
 }
 a:focus-visible,
-button:focus-visible {
+button:focus-visible,
+.gl-version-model:focus-visible,
+.gl-merge-flow:focus-visible,
+.gl-storage-flow:focus-visible,
+.gl-publication-recovery-flow:focus-visible {
   outline: 3px solid var(--gl-brand);
   outline-offset: 4px;
 }
@@ -158,6 +162,11 @@ h3 {
   font-size: 15px;
   line-height: 1.9;
   margin: 0;
+}
+@media (min-width: 1200px) {
+  .gl-section[aria-labelledby="console-title"] .gl-section-heading > p {
+    max-width: 520px;
+  }
 }
 .gl-text-link {
   color: var(--gl-accent);
@@ -458,13 +467,6 @@ h3 {
   aspect-ratio: 1343/683;
   object-fit: contain;
   background: #f5f6f8;
-}
-.gl-console-frame figcaption {
-  font-size: 11px;
-  padding: 12px 18px;
-  text-align: center;
-  color: var(--gl-muted);
-  border-top: 1px solid var(--gl-line);
 }
 .gl-workflow-section {
   background: var(--gl-surface);
@@ -807,9 +809,6 @@ h3 {
   margin-top: 2.2em;
   letter-spacing: -0.4px;
 }
-.td-shell-article .td-content p {
-  max-width: 70ch;
-}
 .td-shell-article .td-content table {
   font-size: 14px;
   line-height: 1.65;
@@ -841,13 +840,6 @@ h3 {
   border-radius: 8px;
   background: #f5f6f8;
 }
-.gl-screenshot figcaption {
-  font-size: 11px;
-  text-align: center;
-  color: var(--gl-muted);
-  line-height: 1.8;
-  margin-top: 10px;
-}
 .gl-version-note {
   border-left: 3px solid var(--gl-brand);
   padding: 12px 17px;
@@ -862,6 +854,19 @@ h3 {
   border: 1px solid var(--gl-line);
   border-radius: 10px;
   background: #fff;
+}
+.gl-version-model,
+.gl-merge-flow,
+.gl-storage-flow,
+.gl-publication-recovery-flow {
+  overflow-x: auto;
+}
+.gl-version-model img,
+.gl-merge-flow img,
+.gl-storage-flow img,
+.gl-publication-recovery-flow img {
+  min-width: 720px;
+  background: var(--gl-bg);
 }
 .gl-doc-banner {
   font-family: var(--gl-mono);
@@ -1069,10 +1074,6 @@ h3 {
   .gl-live-label {
     font-size: 9px;
     flex-basis: 104px;
-  }
-  .gl-console-frame figcaption {
-    font-size: 10px;
-    padding: 10px;
   }
   .gl-cta {
     padding-block: 45px;

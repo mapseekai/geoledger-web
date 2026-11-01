@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="720" viewBox="0 0 1160 720" role="img" aria-labelledby="title desc">
+  <title id="title">核心版本对象关系</title>
+  <desc id="desc">项目关联两个数据集、工作区和当前 HEAD。工作区包含基础修订、草稿编辑版本和跨数据集草稿增量；原子发布产生新的项目级修订并推进 HEAD。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow" d="M0 0L10 5L0 10Z"/></marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow-accent" d="M0 0L10 5L0 10Z"/></marker>
+  </defs>
+  <style>
+    text { font-family: Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif; text-anchor: middle; }
+    .canvas { fill: #fff; }
+    .node { fill: #f8fafc; stroke: #d0d5dd; stroke-width: 1.5; }
+    .project { fill: #0b1220; stroke: #0b1220; }
+    .workspace { fill: #fff4ed; stroke: #f4b294; }
+    .head { fill: #fff; stroke: #98a2b3; }
+    .name { fill: #101828; font-size: 24px; font-weight: 650; }
+    .detail { fill: #475467; font-size: 19px; }
+    .project-text { fill: #fff; }
+    .project-detail { fill: #cbd5e1; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 22px; }
+    .accent { fill: #cc3a05; }
+    .edge-label { font-size: 16px; font-weight: 650; text-anchor: start; }
+    .line { fill: none; stroke: #98a2b3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .publish-line { stroke: #cc3a05; }
+    .arrow { fill: #98a2b3; }
+    .arrow-accent { fill: #cc3a05; }
+    @media (prefers-color-scheme: dark) {
+      .canvas { fill: #101722; }
+      .node { fill: #182334; stroke: #475467; }
+      .project { fill: #253248; stroke: #607086; }
+      .workspace { fill: #35251f; stroke: #b76a48; }
+      .head { fill: #182334; stroke: #667085; }
+      .name { fill: #f2f4f7; }
+      .detail { fill: #cbd5e1; }
+      .accent { fill: #ff9b72; }
+      .line { stroke: #98a2b3; }
+      .publish-line { stroke: #ff9b72; }
+      .arrow-accent { fill: #ff9b72; }
+    }
+  </style>
+  <rect class="canvas" width="1160" height="720" rx="14"/>
+
+  <g class="line" marker-end="url(#arrow)">
+    <path d="M480 114V157H177.5V200"/>
+    <path d="M580 114V177H432.5V200"/>
+    <path d="M680 114V157H890V200"/>
+    <path d="M410 72H25V660H415"/>
+    <path d="M890 288V340H180V400"/>
+    <path d="M447.5 340V400"/>
+    <path d="M717.5 340V400"/>
+  </g>
+  <g class="line publish-line" marker-end="url(#arrow-accent)">
+    <path d="M890 340H990V400"/>
+    <path d="M990 500V660H745"/>
+  </g>
+
+  <rect class="node project" x="410" y="30" width="340" height="84" rx="12"/>
+  <text class="name project-text" x="580" y="65">Project</text>
+  <text class="detail project-detail" x="580" y="94">项目</text>
+
+  <rect class="node" x="60" y="200" width="235" height="88" rx="12"/>
+  <text class="name" x="177.5" y="236">Dataset</text>
+  <text class="detail" x="177.5" y="265">道路图层</text>
+  <rect class="node" x="315" y="200" width="235" height="88" rx="12"/>
+  <text class="name" x="432.5" y="236">Dataset</text>
+  <text class="detail" x="432.5" y="265">设施图层</text>
+  <rect class="node workspace" x="680" y="200" width="420" height="88" rx="12"/>
+  <text class="name accent" x="890" y="236">Workspace</text>
+  <text class="detail" x="890" y="265">个人工作区</text>
+
+  <rect class="node" x="50" y="400" width="260" height="100" rx="12"/>
+  <text class="name mono" x="180" y="441">base_revision</text>
+  <text class="detail" x="180" y="471">固定基础修订</text>
+  <rect class="node" x="320" y="400" width="255" height="100" rx="12"/>
+  <text class="name mono" x="447.5" y="441">version</text>
+  <text class="detail" x="447.5" y="471">草稿乐观编辑版本</text>
+  <rect class="node" x="585" y="400" width="265" height="100" rx="12"/>
+  <text class="name" x="717.5" y="441">草稿增量</text>
+  <text class="detail" x="717.5" y="471">跨数据集要素与字段</text>
+  <text class="edge-label accent" x="1002" y="381">Publish · 原子发布</text>
+  <rect class="node" x="870" y="400" width="240" height="100" rx="12"/>
+  <text class="name" x="990" y="441">Revision</text>
+  <text class="detail" x="990" y="471">新的项目级修订</text>
+
+  <rect class="node head" x="415" y="615" width="330" height="90" rx="12"/>
+  <text class="name mono" x="580" y="651">HEAD</text>
+  <text class="detail" x="580" y="680">当前最新共享修订</text>
+</svg>

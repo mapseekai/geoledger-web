@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="940" viewBox="0 0 1160 940" role="img" aria-labelledby="title desc">
+  <title id="title">冲突审阅、裁决与发布流程</title>
+  <desc id="desc">读取差异与冲突。若存在未解决冲突，先对比三个状态、提交解决结果并变基；否则直接发布。发布时检查 HEAD 和草稿版本，有效则原子提交，失效则重新读取差异与冲突。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow" d="M0 0L10 5L0 10Z"/></marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arrow-accent" d="M0 0L10 5L0 10Z"/></marker>
+  </defs>
+  <style>
+    text { font-family: Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif; text-anchor: middle; }
+    .canvas { fill: #fff; }
+    .node { fill: #f8fafc; stroke: #d0d5dd; stroke-width: 1.5; }
+    .start, .end { fill: #0b1220; stroke: #0b1220; }
+    .publish { fill: #fff4ed; stroke: #f4b294; }
+    .name { fill: #101828; font-size: 24px; font-weight: 650; }
+    .detail { fill: #475467; font-size: 19px; }
+    .light { fill: #fff; }
+    .light-detail { fill: #cbd5e1; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .accent { fill: #cc3a05; }
+    .branch { font-size: 18px; font-weight: 650; }
+    .line { fill: none; stroke: #98a2b3; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .accent-line { stroke: #cc3a05; }
+    .arrow { fill: #98a2b3; }
+    .arrow-accent { fill: #cc3a05; }
+    @media (prefers-color-scheme: dark) {
+      .canvas { fill: #101722; }
+      .node { fill: #182334; stroke: #475467; }
+      .start, .end { fill: #253248; stroke: #607086; }
+      .publish { fill: #35251f; stroke: #b76a48; }
+      .name { fill: #f2f4f7; }
+      .detail { fill: #cbd5e1; }
+      .accent { fill: #ff9b72; }
+      .line { stroke: #98a2b3; }
+      .accent-line { stroke: #ff9b72; }
+      .arrow-accent { fill: #ff9b72; }
+    }
+  </style>
+  <rect class="canvas" width="1160" height="940" rx="14"/>
+
+  <g class="line" marker-end="url(#arrow)">
+    <path d="M580 103V125"/>
+    <path d="M420 180H210V630H400"/>
+    <path d="M740 180H875V270"/>
+    <path d="M875 348V380"/>
+    <path d="M875 458V490"/>
+    <path d="M875 568V630H760"/>
+    <path d="M580 670V690"/>
+    <path d="M420 750H65V65H400"/>
+  </g>
+  <path class="line accent-line" d="M580 810V840" marker-end="url(#arrow-accent)"/>
+
+  <rect class="node start" x="400" y="25" width="360" height="78" rx="12"/>
+  <text class="name light" x="580" y="57">读取差异与冲突</text>
+  <text class="detail light-detail mono" x="580" y="84">conflicts</text>
+
+  <path class="node" d="M580 125L740 180L580 235L420 180Z"/>
+  <text class="name" x="580" y="174">存在未解决</text>
+  <text class="name" x="580" y="203">冲突？</text>
+  <text class="branch detail" x="365" y="165">否</text>
+  <text class="branch accent" x="790" y="165">是</text>
+
+  <rect class="node" x="700" y="270" width="350" height="78" rx="12"/>
+  <text class="name" x="875" y="302">对比三个状态</text>
+  <text class="detail mono" x="875" y="329">Base / Current / Draft</text>
+  <rect class="node" x="700" y="380" width="350" height="78" rx="12"/>
+  <text class="name" x="875" y="412">提交完整最终要素</text>
+  <text class="detail mono" x="875" y="439">resolve</text>
+  <rect class="node" x="700" y="490" width="350" height="78" rx="12"/>
+  <text class="name" x="875" y="522">更新工作区基线</text>
+  <text class="detail mono" x="875" y="549">rebase</text>
+
+  <rect class="node publish" x="400" y="590" width="360" height="80" rx="12"/>
+  <text class="name accent" x="580" y="622">执行发布</text>
+  <text class="detail mono" x="580" y="650">publish</text>
+
+  <path class="node" d="M580 690L740 750L580 810L420 750Z"/>
+  <text class="name" x="580" y="743">HEAD 与草稿版本</text>
+  <text class="name" x="580" y="772">仍然有效？</text>
+  <text class="branch detail" x="365" y="735">否</text>
+  <text class="branch accent" x="606" y="833">是</text>
+
+  <rect class="node end" x="400" y="840" width="360" height="80" rx="12"/>
+  <text class="name light" x="580" y="889">单事务原子提交</text>
+</svg>
